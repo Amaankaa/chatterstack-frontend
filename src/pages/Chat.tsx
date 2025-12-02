@@ -143,7 +143,7 @@ export default function Chat() {
     if (!roomQuery.trim()) return true;
     const query = roomQuery.toLowerCase();
     if (room.is_group) {
-      return room.name.toLowerCase().includes(query);
+      return (room.name || "").toLowerCase().includes(query);
     } else {
       const name = dmMap.get(room.id);
       return name ? name.toLowerCase().includes(query) : false;
