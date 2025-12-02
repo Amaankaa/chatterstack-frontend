@@ -8,7 +8,7 @@ interface RoomListResponse {
 export const getRooms = async (query?: string) => {
   const params = query ? { q: query, limit: 20 } : { limit: 50 };
   const response = await api.get<RoomListResponse>('/rooms', { params });
-  return response.data?.rooms || [];
+  return response.data.rooms || [];
 };
 
 // FIX: Updated signature to accept creatorId

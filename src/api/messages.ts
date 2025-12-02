@@ -20,7 +20,7 @@ export const getRoomMessages = async (roomId: string, params: { limit?: number, 
   const response = await api.get<MessageListResponse>(`/rooms/${roomId}/messages`, { 
     params: { limit: 100, ...params } 
   });
-  return response.data?.messages || [];
+  return response.data.messages || [];
 };
 
 export const sendMessage = async (roomId: string, content: string) => {

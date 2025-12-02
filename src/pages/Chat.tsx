@@ -143,6 +143,7 @@ export default function Chat() {
     if (!roomQuery.trim()) return true;
     const query = roomQuery.toLowerCase();
     if (room.is_group) {
+      // Safety check: room.name might be undefined/null from backend
       return (room.name || "").toLowerCase().includes(query);
     } else {
       const name = dmMap.get(room.id);
@@ -152,8 +153,6 @@ export default function Chat() {
 
   // Helper to normalize messages and fetch missing usernames
   const processMessages = async (rawMessages: Message[]) => {
-    if (!Array.isArray(rawMessages)) return [];
-    
     // 1. Normalize messages
     const normalized = rawMessages.map((msg: any) => ({
       ...msg,
