@@ -123,14 +123,33 @@ export function MessageList({ activeRoom, dmMap, messages, user, highlightedMsgI
           const isEditing = editingId === msg.id;
           
           // Date Separator Logic
-          const showDateSeparator = index === 0 || !isSameDay(new Date(messages[index - 1].created_at), new Date(msg.created_at));
+          let showDateSeparator = false;
+          try {
+             if (index === 0) {
+                 showDateSeparator = true;
+             } else {
+                 const prevDate = new Date(messages[index - 1].created_at);
+                 const currDate = new Date(msg.created_at);
+                 if (!isNaN(prevDate.getTime()) && !isNaN(currDate.getTime())) {
+                     showDateSeparator = !isSameDay(prevDate, currDate);
+                 }
+             }
+          } catch (e) {
+             console.error("Date parsing error", e);
+          }
 
           return (
             <div key={msg.id}>
               {showDateSeparator && (
                 <div className="flex items-center justify-center my-4">
                   <div className="bg-slate-800 text-slate-400 text-xs px-3 py-1 rounded-full">
-                    {format(new Date(msg.created_at), 'MMMM d, yyyy')}
+                    {(() => {
+                        try {
+                            return format(new Date(msg.created_at), 'MMMM d, yyyy');
+                        } catch {
+                            return 'Unknown Date';
+                        }
+                    })()}
                   </div>
                 </div>
               )}
@@ -148,7 +167,15 @@ export function MessageList({ activeRoom, dmMap, messages, user, highlightedMsgI
                 <div className={cn("flex flex-col max-w-full", isMe ? "items-end" : "items-start")}>
                   <div className="flex items-baseline gap-2 mb-1">
                     <span className="text-sm font-semibold text-slate-300">{msg.username}</span>
-                    <span className="text-xs text-slate-600">{format(new Date(msg.created_at), 'h:mm a')}</span>
+                    <span className="text-xs text-slate-600">
+                        {(() => {
+                            try {
+                                return format(new Date(msg.created_at), 'h:mm a');
+                            } catch {
+                                return '';
+                            }
+                        })()}
+                    </span>
                     {msg.updated_at && msg.updated_at !== msg.created_at && <span className="text-[10px] text-slate-600 italic">(edited)</span>}
                   </div>
                   
