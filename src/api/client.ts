@@ -5,20 +5,8 @@ import axios from 'axios';
 // 2. API_BASE_URL (infra-provided)
 // 3. process.env (fallback for non-Vite environments)
 // 4. Fallback to the dev proxy path '/v1'
-const meta: any = import.meta as any;
-let rawApi: string | undefined;
-if (meta && meta.env) {
-  rawApi = meta.env.VITE_API_URL ?? meta.env.API_BASE_URL;
-} else if (typeof process !== 'undefined' && process.env) {
-  rawApi = process.env.VITE_API_URL ?? process.env.API_BASE_URL;
-}
-
-let resolvedBase = '/v1';
-if (rawApi) {
-  const s = String(rawApi).replace(/\/+$/g, '');
-  // If the provided URL already ends with /v1, use as-is, otherwise append /v1
-  resolvedBase = s.endsWith('/v1') ? s : `${s}/v1`;
-}
+// Use relative path /v1 so requests are proxied by Vercel (production) or Vite (development)
+const resolvedBase = '/v1';
 
 export const api = axios.create({
   baseURL: resolvedBase,

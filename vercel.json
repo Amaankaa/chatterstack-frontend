@@ -1,0 +1,6 @@
+{
+  "rewrites": [
+    { "source": "/v1/:path*", "destination": "https://chatterstack-alb-730649082.us-east-1.elb.amazonaws.com/v1/:path*" },
+    { "source": "/health",    "destination": "https://chatterstack-alb-730649082.us-east-1.elb.amazonaws.com/health" }
+  ]
+}

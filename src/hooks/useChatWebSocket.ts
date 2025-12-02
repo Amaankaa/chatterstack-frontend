@@ -31,28 +31,13 @@ export const useChatWebSocket = (
       socketRef.current.close();
     }
 
-    // Construct WS URL with fallbacks (support both VITE_ and non-prefixed env names)
-    const rawWs: string | undefined = (import.meta as any).VITE_WS_URL ?? (import.meta as any).WS_BASE_URL ?? (import.meta as any).API_BASE_URL;
-    let baseWs = '';
-
-    if (rawWs) {
-      // Normalize and convert http(s) -> ws(s) if necessary
-      let s = String(rawWs).replace(/\/+$/g, '');
-      // If someone passed the REST base with /v1, strip it before deriving /ws
-      s = s.replace(/\/v1$/i, '');
-      if (s.startsWith('http://')) s = s.replace(/^http:\/\//, 'ws://');
-      else if (s.startsWith('https://')) s = s.replace(/^https:\/\//, 'wss://');
-
-      // Ensure path ends with /ws
-      baseWs = s.endsWith('/ws') ? s : `${s}/ws`;
-    } else {
-      // Default to relative path through the dev proxy
-      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-      const host = window.location.host;
-      baseWs = `${protocol}//${host}/ws`;
-    }
-
-    const url = `${baseWs}?room_id=${activeRoomId}&token=${token}`;
+    // Connect directly to ALB (wss) as per backend requirements
+    const wssBase = 'wss://chatterstack-alb-730649082.us-east-1.elb.amazonaws.com';
+    const qs = new URLSearchParams({
+      room_id: activeRoomId,
+      access_token: token,
+    });
+    const url = `${wssBase}/ws?${qs.toString()}`;
     const ws = new WebSocket(url);
     socketRef.current = ws;
 
