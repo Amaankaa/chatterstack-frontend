@@ -50,6 +50,8 @@ export default function Chat() {
   const [highlightedMsgId, setHighlightedMsgId] = useState<string | null>(null);
   const [typingUsers, setTypingUsers] = useState<Set<string>>(new Set());
   const [isLocalTyping, setIsLocalTyping] = useState(false);
+  // Unread counts per room
+  const [unreadByRoom, setUnreadByRoom] = useState<Map<string, number>>(new Map());
 
   // Pagination State
   const [currentPage, setCurrentPage] = useState(1);
@@ -204,6 +206,12 @@ export default function Chat() {
   useEffect(() => {
     if (activeRoom) {
       localStorage.setItem('lastActiveRoomId', activeRoom.id);
+      // Reset unread count for the active room when opened
+      setUnreadByRoom(prev => {
+        const next = new Map(prev);
+        next.set(activeRoom.id, 0);
+        return next;
+      });
       
       // Load history when room changes
       const loadHistory = async () => {
@@ -237,6 +245,17 @@ export default function Chat() {
   // --- 4. WebSocket Integration ---
   // FIX: Use useCallback to prevent infinite reconnection loop
   const handleIncomingMessage = useCallback(async (incomingMsg: Message) => {
+    // If message belongs to a different room, increment unread count and exit
+    if (!activeRoom || incomingMsg.room_id !== activeRoom.id) {
+      setUnreadByRoom(prev => {
+        const next = new Map(prev);
+        const current = next.get(incomingMsg.room_id) || 0;
+        next.set(incomingMsg.room_id, current + 1);
+        return next;
+      });
+      return;
+    }
+
     let finalMsg = { ...incomingMsg };
 
     // If username is missing or Unknown, try to resolve it
@@ -279,7 +298,23 @@ export default function Chat() {
     setMessages(prev => prev.filter(msg => msg.id !== msgId));
   }, []);
 
-  const { isConnected, sendJsonMessage } = useChatWebSocket(activeRoom?.id || null, handleIncomingMessage, handleTyping, handleMessageDeleted);
+  const handleRoomAdded = useCallback((newRoom: Room) => {
+    setRooms(prev => {
+        if (prev.find(r => r.id === newRoom.id)) return prev;
+        return [newRoom, ...prev];
+    });
+    toast({ title: "New Channel", description: `You were added to #${newRoom.name || 'a new room'}` });
+  }, [toast]);
+
+  // Pass all room IDs to subscribe to all of them
+  const roomIds = rooms.map(r => r.id);
+  const { isConnected, sendJsonMessage } = useChatWebSocket(
+    roomIds, 
+    handleIncomingMessage, 
+    handleTyping, 
+    handleMessageDeleted,
+    handleRoomAdded
+  );
 
   const handleUserTyping = (isTyping: boolean) => {
     if (!activeRoom) return;
@@ -603,6 +638,7 @@ export default function Chat() {
         handleCreateDM={handleCreateDM}
         isInviting={isInviting}
         dmMap={dmMap}
+        unreadByRoom={unreadByRoom}
         user={user}
         handleLogout={handleLogout}
       />

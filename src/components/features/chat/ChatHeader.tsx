@@ -110,7 +110,7 @@ export function ChatHeader({
               <DialogTrigger asChild><Button variant="ghost" size="icon" className="text-slate-400 hover:text-white hover:bg-slate-800" title="Add Member"><UserPlus className="w-5 h-5" /></Button></DialogTrigger>
               <DialogContent className="bg-slate-900 border-slate-800 text-white">
                 <DialogHeader><DialogTitle>Add people to #{activeRoom.name}</DialogTitle></DialogHeader>
-                <div className="py-4"><Label className="text-slate-400">User Email</Label><Input value={inviteEmail} onChange={(e) => setInviteEmail(e.target.value)} className="mt-2 bg-slate-950 border-slate-800 text-white focus-visible:ring-indigo-500" /></div>
+                <div className="py-4"><Label className="text-slate-400">User Email</Label><Input value={inviteEmail} onChange={(e) => setInviteEmail(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter' && inviteEmail.trim()) handleAddMember(); }} className="mt-2 bg-slate-950 border-slate-800 text-white focus-visible:ring-indigo-500" /></div>
                 <DialogFooter><Button onClick={handleAddMember} disabled={isInviting || !inviteEmail.trim()} className="bg-indigo-600 hover:bg-indigo-700 text-white">{isInviting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}Add Member</Button></DialogFooter>
               </DialogContent>
             </Dialog>

@@ -31,6 +31,7 @@ interface ChatSidebarProps {
   handleCreateDM: () => void;
   isInviting: boolean;
   dmMap: Map<string, string>;
+  unreadByRoom?: Map<string, number>;
   user: User | null;
   handleLogout: () => void;
 }
@@ -38,7 +39,7 @@ interface ChatSidebarProps {
 export function ChatSidebar({
   isSidebarOpen, setIsSidebarOpen, roomQuery, setRoomQuery, filteredRooms, activeRoom, setActiveRoom,
   isCreateRoomOpen, setIsCreateRoomOpen, newRoomName, setNewRoomName, handleCreateRoom,
-  isCreateDMOpen, setIsCreateDMOpen, dmEmail, setDmEmail, handleCreateDM, isInviting, dmMap, user, handleLogout
+  isCreateDMOpen, setIsCreateDMOpen, dmEmail, setDmEmail, handleCreateDM, isInviting, dmMap, unreadByRoom, user, handleLogout
 }: ChatSidebarProps) {
   return (
     <>
@@ -92,8 +93,16 @@ export function ChatSidebar({
               </div>
               <div className="space-y-1">
                 {filteredRooms.filter(r => r.is_group).map((room) => (
-                  <button key={room.id} onClick={() => { setActiveRoom(room); setIsSidebarOpen(false); }} className={cn("w-full flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-all", activeRoom?.id === room.id ? "bg-indigo-500/10 text-indigo-400" : "text-slate-400 hover:bg-slate-800 hover:text-slate-100")}>
-                    <Hash className="w-4 h-4 opacity-50" /><span className="truncate">{room.name}</span>
+                  <button key={room.id} onClick={() => { setActiveRoom(room); setIsSidebarOpen(false); }} className={cn("w-full flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-all", activeRoom?.id === room.id ? "bg-indigo-500/10 text-indigo-400" : "text-slate-400 hover:bg-slate-800 hover:text-slate-100")}> 
+                    <div className="relative flex items-center gap-3">
+                      <Hash className="w-4 h-4 opacity-50" />
+                      <span className="truncate">{room.name}</span>
+                      {unreadByRoom && (unreadByRoom.get(room.id) || 0) > 0 && activeRoom?.id !== room.id && (
+                        <span className="ml-auto inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-indigo-600 text-white text-[11px]">
+                          {unreadByRoom.get(room.id)}
+                        </span>
+                      )}
+                    </div>
                   </button>
                 ))}
               </div>
@@ -133,12 +142,17 @@ export function ChatSidebar({
               </div>
               <div className="space-y-1">
                 {filteredRooms.filter(r => !r.is_group).map((room) => (
-                  <button key={room.id} onClick={() => { setActiveRoom(room); setIsSidebarOpen(false); }} className={cn("w-full flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-all", activeRoom?.id === room.id ? "bg-indigo-500/10 text-indigo-400" : "text-slate-400 hover:bg-slate-800 hover:text-slate-100")}>
+                  <button key={room.id} onClick={() => { setActiveRoom(room); setIsSidebarOpen(false); }} className={cn("w-full flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-all", activeRoom?.id === room.id ? "bg-indigo-500/10 text-indigo-400" : "text-slate-400 hover:bg-slate-800 hover:text-slate-100")}> 
                     <div className="relative">
                       <Avatar className="h-4 w-4"><AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${dmMap.get(room.id) || 'User'}`} /></Avatar>
                       <span className="absolute bottom-0 right-0 w-1.5 h-1.5 bg-green-500 rounded-full border border-slate-900"></span>
                     </div>
                     <span className="truncate">{dmMap.get(room.id) || 'Loading...'}</span>
+                    {unreadByRoom && (unreadByRoom.get(room.id) || 0) > 0 && activeRoom?.id !== room.id && (
+                      <span className="ml-auto inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-indigo-600 text-white text-[11px]">
+                        {unreadByRoom.get(room.id)}
+                      </span>
+                    )}
                   </button>
                 ))}
               </div>

@@ -1,12 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
 import { useAuthStore } from '@/stores/authStore';
-import { Message } from '@/types';
+import { Message, Room } from '@/types';
 
 export const useChatWebSocket = (
-  activeRoomId: string | null, 
+  roomIds: string[], 
   onMessageReceived: (msg: Message) => void,
   onTyping?: (username: string, isTyping: boolean) => void,
-  onMessageDeleted?: (msgId: string) => void
+  onMessageDeleted?: (msgId: string) => void,
+  onRoomAdded?: (room: Room) => void
 ) => {
   const socketRef = useRef<WebSocket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
@@ -20,23 +21,23 @@ export const useChatWebSocket = (
   };
 
   useEffect(() => {
-    // Only connect if we have a token and a room
-    if (!token || !activeRoomId) {
+    // Only connect if we have a token and at least one room (backend requirement)
+    if (!token || roomIds.length === 0) {
       setIsConnected(false);
       return;
     }
 
-    // Close existing connection if switching rooms
+    // Close existing connection if room list changes (to resubscribe)
     if (socketRef.current) {
       socketRef.current.close();
     }
 
     // Connect directly to CloudFront (wss) as per backend requirements (Secure WS)
     const wssBase = 'wss://d1176qoi9kdya5.cloudfront.net';
-    const qs = new URLSearchParams({
-      room_id: activeRoomId,
-      access_token: token,
-    });
+    const qs = new URLSearchParams();
+    qs.append('access_token', token);
+    roomIds.forEach(id => qs.append('room_id', id));
+
     const url = `${wssBase}/ws?${qs.toString()}`;
     
     let ws: WebSocket;
@@ -76,6 +77,9 @@ export const useChatWebSocket = (
             if (username) onTyping(username, false);
         } else if (payload.event === 'message.deleted' && onMessageDeleted && payload.data?.id) {
             onMessageDeleted(payload.data.id);
+        } else if ((payload.event === 'room_added' || payload.event === 'added_to_room') && onRoomAdded && payload.data) {
+            // Handle real-time room addition
+            onRoomAdded(payload.data);
         }
       } catch (err) {
         console.error("WS JSON Parse Error", err);
@@ -104,8 +108,7 @@ export const useChatWebSocket = (
         ws.close(1000, "Component unmounting or room changing");
       }
     };
-  }, [activeRoomId, token, onMessageReceived, onTyping, onMessageDeleted, retryCount]); // Added onTyping to deps if stable, but usually functions aren't stable unless useCallback. 
-  // We will assume onTyping is stable or ignore the warning for now to avoid infinite loops if user forgets useCallback.
+  }, [JSON.stringify(roomIds), token, onMessageReceived, onTyping, onMessageDeleted, onRoomAdded, retryCount]); 
 
   return { isConnected, sendJsonMessage };
 };
