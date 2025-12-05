@@ -31,8 +31,8 @@ export const useChatWebSocket = (
       socketRef.current.close();
     }
 
-    // Connect directly to ALB (ws) as per backend requirements (HTTP-only ALB)
-    const wssBase = 'ws://chatterstack-alb-730649082.us-east-1.elb.amazonaws.com';
+    // Connect directly to CloudFront (wss) as per backend requirements (Secure WS)
+    const wssBase = 'wss://d1176qoi9kdya5.cloudfront.net';
     const qs = new URLSearchParams({
       room_id: activeRoomId,
       access_token: token,

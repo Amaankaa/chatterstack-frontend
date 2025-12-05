@@ -13,7 +13,7 @@ export default defineConfig({
     proxy: {
       '/v1': { target: 'http://chatterstack-alb-730649082.us-east-1.elb.amazonaws.com', changeOrigin: true },
       '/ws': { 
-        target: 'ws://chatterstack-alb-730649082.us-east-1.elb.amazonaws.com', 
+        target: 'wss://d1176qoi9kdya5.cloudfront.net', 
         ws: true,
         changeOrigin: true,
         configure: (proxy, _options) => {
