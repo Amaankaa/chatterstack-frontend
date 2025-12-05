@@ -38,7 +38,15 @@ export const useChatWebSocket = (
       access_token: token,
     });
     const url = `${wssBase}/ws?${qs.toString()}`;
-    const ws = new WebSocket(url);
+    
+    let ws: WebSocket;
+    try {
+      ws = new WebSocket(url);
+    } catch (error) {
+      console.error("Failed to connect to WebSocket:", error);
+      return;
+    }
+    
     socketRef.current = ws;
 
     ws.onopen = () => {
