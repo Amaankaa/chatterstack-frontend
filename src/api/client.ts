@@ -1,15 +1,17 @@
 import axios from 'axios';
 
-// Resolve API base URL with a few fallbacks:
-// 1. VITE_API_URL (preferred for Vite builds via import.meta.env)
-// 2. API_BASE_URL (infra-provided)
-// 3. process.env (fallback for non-Vite environments)
-// 4. Fallback to the dev proxy path '/v1'
-// Use relative path /v1 so requests are proxied by Vercel (production) or Vite (development)
-const resolvedBase = '/v1';
+// Use absolute API base from environment across all environments
+// Expect `VITE_API_URL` to be an absolute URL like
+const envBase = (import.meta as any)?.env?.VITE_API_URL
+  || process.env.VITE_API_URL
+  || process.env.API_BASE_URL;
+
+if (!envBase) {
+  console.warn('[api] VITE_API_URL is not set. Please configure an absolute API base URL.');
+}
 
 export const api = axios.create({
-  baseURL: resolvedBase,
+  baseURL: envBase,
   headers: { 'Content-Type': 'application/json' },
 });
 
