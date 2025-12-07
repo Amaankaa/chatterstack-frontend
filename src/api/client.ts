@@ -15,10 +15,14 @@ export const api = axios.create({
   headers: { 'Content-Type': 'application/json' },
 });
 
-// Attach token to every request
+// Attach token to every request, except for public endpoints
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('access_token');
-  if (token) {
+  // List of public endpoints that should not receive the Authorization header
+  const publicEndpoints = ['/auth/login', '/auth/register'];
+  const isPublic = publicEndpoints.some(endpoint => config.url?.includes(endpoint));
+
+  if (token && !isPublic) {
     config.headers.Authorization = `Bearer ${token}`;
   }
   return config;
