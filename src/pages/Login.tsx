@@ -28,7 +28,7 @@ export default function Login() {
       localStorage.setItem('access_token', res.access_token);
       localStorage.setItem('refresh_token', res.refresh_token);
 
-      // 3. If 'user' is missing in response, fetch it using the email
+            // 3. If 'user' is missing in response, fetch it using the email
       let userProfile = res.user;
       if (!userProfile) {
          userProfile = await getUserByEmail(data.email);
