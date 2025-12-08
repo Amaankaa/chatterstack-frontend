@@ -1,23 +1,34 @@
 import { useState, useEffect } from 'react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  GithubIcon,
-  ArrowRight,
+  Github,
   Zap,
-  BookOpen,
   Copy,
   Check,
   Globe,
-  Layers,
   Shield,
   Send,
-  LinkedinIcon,
-  MessageCircle, // WhatsApp style
-  Palette,
-  FileType
+  Linkedin,
+  MessageCircle, 
+  FileType,
+  Layout,
+  Activity,
+  Loader2, // Added for loading state
+  LogIn
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+
+// --- CONFIG ---
+const URLS = {
+  register: "https://chatterstack.vercel.app/register",
+  login: "https://chatterstack.vercel.app/login",
+  repo: "https://github.com/Amaankaa/ChatterStack",
+  docs: "https://github.com/Amaankaa/ChatterStack/blob/main/API_documentation.md",
+  rawJourney: "https://raw.githubusercontent.com/Amaankaa/ChatterStack/main/TheJourney.md"
+};
 
 // --- ANIMATION COMPONENTS ---
 
@@ -65,40 +76,40 @@ const BackgroundEffects = () => (
 
 const FEATURES = [
   {
-    title: 'WebSockets that Scale',
-    desc: 'Hub + rooms, fan-out via Redis pub/sub, instant delivery.',
+    title: 'Redis Pub/Sub Fan-out',
+    desc: 'Scales horizontally. Messages broadcast across distributed ECS tasks instantly.',
     icon: <Zap className="w-6 h-6 text-yellow-400" />,
     gradient: 'from-yellow-500/20 to-orange-500/20',
   },
   {
-    title: 'Type-Safe Frontend',
-    desc: 'Built with React 18, TypeScript, and Tailwind CSS. Fully typed.',
-    icon: <FileType className="w-6 h-6 text-blue-400" />,
+    title: 'Live Typing & Presence',
+    desc: 'Real-time typing indicators and user status updates via WebSocket events.',
+    icon: <Activity className="w-6 h-6 text-blue-400" />,
     gradient: 'from-blue-500/20 to-cyan-500/20',
   },
   {
-    title: 'Production Infra',
-    desc: 'CloudFront → ALB → ECS Fargate, RDS Postgres, Secrets Manager.',
+    title: 'Production Architecture',
+    desc: 'CloudFront → ALB → ECS Fargate + RDS Postgres. Clean Architecture pattern.',
     icon: <Globe className="w-6 h-6 text-emerald-400" />,
     gradient: 'from-emerald-500/20 to-green-500/20',
   },
   {
-    title: 'Secure by Default',
-    desc: 'JWT auth, rate limiting, disciplined CORS + header strategy.',
+    title: 'Secure Edge Auth',
+    desc: 'Dual-strategy auth: JWT for REST, Token-over-Query for WebSockets.',
     icon: <Shield className="w-6 h-6 text-red-400" />,
     gradient: 'from-red-500/20 to-pink-500/20',
   },
   {
-    title: 'Docs & Tests',
-    desc: 'OpenAPI + Postman with unit and integration coverage.',
-    icon: <BookOpen className="w-6 h-6 text-purple-400" />,
+    title: 'Message Lifecycle',
+    desc: 'Support for editing and deleting messages with real-time propagation.',
+    icon: <Layout className="w-6 h-6 text-purple-400" />,
     gradient: 'from-purple-500/20 to-violet-500/20',
   },
   {
-    title: 'Beautiful UI',
-    desc: 'Styled with Tailwind CSS and animated with Framer Motion.',
-    icon: <Palette className="w-6 h-6 text-pink-400" />,
-    gradient: 'from-pink-500/20 to-rose-500/20',
+    title: 'Type-Safe Frontend',
+    desc: 'React 18 + TypeScript + Tailwind. Fully typed request/response cycles.',
+    icon: <FileType className="w-6 h-6 text-slate-400" />,
+    gradient: 'from-slate-500/20 to-gray-500/20',
   },
 ];
 
@@ -160,7 +171,7 @@ const TECH_STACK = [
   { name: 'Tailwind', icon: '🎨', color: 'text-sky-300', border: 'border-sky-500/20', bg: 'bg-sky-500/10' },
   { name: 'Go', icon: '🐹', color: 'text-cyan-200', border: 'border-cyan-400/20', bg: 'bg-cyan-400/10' },
   { name: 'Redis', icon: '🔴', color: 'text-red-400', border: 'border-red-500/20', bg: 'bg-red-500/10' },
-  { name: 'AWS', icon: '☁️', color: 'text-orange-400', border: 'border-orange-500/20', bg: 'bg-orange-500/10' },
+  { name: 'Postgres', icon: '🐘', color: 'text-blue-300', border: 'border-blue-400/20', bg: 'bg-blue-400/10' },
 ];
 
 // --- UI HELPERS ---
@@ -265,28 +276,34 @@ const LandingView = ({ onReadJourney }: { onReadJourney: () => void }) => {
               </h1>
               <p className="mb-8 text-lg text-slate-400 max-w-lg">
                 The missing production manual. We combined <strong>TypeScript</strong> and <strong>Tailwind</strong> on the front with 
-                <strong> Go</strong> and <strong>Redis</strong> on the back. Documented so you can skip the infra headaches.
+                <strong> Go</strong>, <strong>Redis</strong>, and <strong>Postgres</strong> on the back. Scalable, clean, and ready to deploy.
               </p>
               
               <div className="flex flex-wrap gap-4 mb-8">
                 <Button asChild size="lg" className="bg-sky-500 hover:bg-sky-600 text-white font-semibold shadow-lg shadow-sky-500/25">
                   <a
-                    href="https://github.com/Amaankaa/chatterstack-frontend"
+                    href={URLS.register}
                     target="_blank"
                     rel="noreferrer"
                     className="inline-flex items-center"
                   >
-                    <GithubIcon className="mr-2 h-5 w-5" /> View on GitHub
+                    <Zap className="mr-2 h-5 w-5" /> Get Started
                   </a>
                 </Button>
                 <Button
-                  onClick={onReadJourney}
+                  asChild
                   variant="outline"
                   size="lg"
                   className="border-slate-700 bg-slate-900/50 text-slate-300 hover:bg-slate-800 hover:text-white backdrop-blur-sm"
                 >
-                  Read the Journey
-                  <ArrowRight className="ml-2 h-4 w-4" />
+                   <a
+                    href={URLS.repo}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center"
+                  >
+                    <Github className="mr-2 h-4 w-4" /> GitHub
+                  </a>
                 </Button>
               </div>
 
@@ -320,9 +337,9 @@ const LandingView = ({ onReadJourney }: { onReadJourney: () => void }) => {
                   <div>socket.onopen = () =&gt; {'{'} </div>
                   <div className="pl-4">console.log(<span className="text-yellow-300">'Gateway Connected ⚡'</span>);</div>
                   <div className="pl-4">socket.send(JSON.stringify({'{'}</div>
-                  <div className="pl-8">event: <span className="text-emerald-400">'message'</span>,</div>
+                  <div className="pl-8">event: <span className="text-emerald-400">'typing_start'</span>,</div>
                   <div className="pl-8">
-                     content: '<Typewriter text="Full stack simplicity." />'
+                     content: '<Typewriter text="User is typing..." />'
                   </div>
                   <div className="pl-4">{'}'}));</div>
                   <div>{'}'};</div>
@@ -419,6 +436,26 @@ const LandingView = ({ onReadJourney }: { onReadJourney: () => void }) => {
 };
 
 const JourneyView = () => {
+  const [content, setContent] = useState('');
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch(URLS.rawJourney)
+      .then((res) => {
+        if (!res.ok) throw new Error('Failed to load journey');
+        return res.text();
+      })
+      .then((text) => {
+        setContent(text);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error("Failed to fetch journey", err);
+        setContent("# Error Loading Content\nCould not fetch the logs from GitHub. Please check the repo directly.");
+        setLoading(false);
+      });
+  }, []);
+
   return (
     <motion.div 
       initial={{ opacity: 0, y: 20 }} 
@@ -430,80 +467,25 @@ const JourneyView = () => {
         <div className="inline-block mb-4 px-3 py-1 rounded-full border border-purple-500/30 bg-purple-500/10 text-purple-300 text-xs uppercase tracking-wider">
           Engineering Logs
         </div>
-        <h1 className="text-4xl md:text-5xl font-bold text-white mb-6">Building The Beast</h1>
+        <h1 className="text-4xl md:text-5xl font-bold text-white mb-6">The Journey</h1>
         <p className="text-slate-400 text-lg max-w-2xl mx-auto">
-          The journey from a "simple chat app" to a distributed system handling thousands of connections. 
-          Here are the pitfalls we hit so you don't have to.
+          The pitfalls we hit so you don't have to. Reading live from the repository.
         </p>
       </div>
 
-      <div className="space-y-12">
-        {/* CHAPTER 1 */}
-        <div className="p-8 rounded-3xl border border-slate-800 bg-slate-900/40 backdrop-blur-md">
-          <div className="flex items-center gap-4 mb-6">
-            <div className="h-10 w-10 rounded-lg bg-red-500/20 flex items-center justify-center border border-red-500/30">
-              <Shield className="w-5 h-5 text-red-400" />
-            </div>
-            <h2 className="text-2xl font-bold text-white">The CloudFront Header Incident</h2>
+      <div className="p-8 md:p-12 rounded-3xl border border-slate-800 bg-slate-900/40 backdrop-blur-md min-h-[400px] shadow-2xl">
+        {loading ? (
+          <div className="flex flex-col items-center justify-center h-64 text-slate-500">
+            <Loader2 className="w-8 h-8 animate-spin mb-4 text-sky-500" />
+            <p className="animate-pulse">Fetching logs from GitHub...</p>
           </div>
-          <div className="prose prose-invert prose-slate max-w-none text-slate-300 leading-relaxed">
-            <p className="mb-4">
-              We deployed the first version with standard Authorization headers. It worked locally. It worked on bare EC2. 
-              But the moment we put it behind CloudFront, all WebSockets failed.
-            </p>
-            <p className="mb-4 border-l-2 border-red-500/50 pl-4 bg-red-900/10 py-2 pr-2 rounded-r">
-              <strong>The Gotcha:</strong> By default, CloudFront strips the <code>Authorization</code> header and doesn't forward cookies 
-              to the origin to improve caching hit rates.
-            </p>
-            <p>
-              <strong>The Fix:</strong> We implemented a dual-strategy. REST APIs use a custom <code>X-Auth-Token</code> header 
-              (which we explicitly allowlisted in CloudFront behaviors), and WebSockets use a query parameter 
-              <code>?access_token=...</code> because browsers don't allow custom headers in the WebSocket handshake constructor.
-            </p>
-          </div>
-        </div>
-
-        {/* CHAPTER 2 */}
-        <div className="p-8 rounded-3xl border border-slate-800 bg-slate-900/40 backdrop-blur-md">
-          <div className="flex items-center gap-4 mb-6">
-            <div className="h-10 w-10 rounded-lg bg-blue-500/20 flex items-center justify-center border border-blue-500/30">
-              <Layers className="w-5 h-5 text-blue-400" />
-            </div>
-            <h2 className="text-2xl font-bold text-white">Redis Pub/Sub: The Glue</h2>
-          </div>
-          <div className="prose prose-invert prose-slate max-w-none text-slate-300 leading-relaxed">
-            <p className="mb-4">
-              Scaling ECS tasks horizontally created a problem: If Alice is connected to <em>Server A</em> and Bob is connected to <em>Server B</em>, 
-              how does Server A send a message to Bob?
-            </p>
-            <p>
-              We used Redis Pub/Sub as a message bus. Every Go instance subscribes to a specific Redis channel based on active rooms. 
-              When a message comes in, it's published to Redis, fan-out occurs, and the relevant Go instance pushes it down the WebSocket.
-              This allows us to scale ECS tasks from 1 to 100 without sticky sessions.
-            </p>
-          </div>
-        </div>
-
-        {/* CHAPTER 3 */}
-        <div className="p-8 rounded-3xl border border-slate-800 bg-slate-900/40 backdrop-blur-md">
-           <div className="flex items-center gap-4 mb-6">
-            <div className="h-10 w-10 rounded-lg bg-emerald-500/20 flex items-center justify-center border border-emerald-500/30">
-              <Check className="w-5 h-5 text-emerald-400" />
-            </div>
-            <h2 className="text-2xl font-bold text-white">Go Concurrency Patterns</h2>
-          </div>
-          <div className="prose prose-invert prose-slate max-w-none text-slate-300 leading-relaxed">
-            <p className="mb-4">
-              Managing thousands of connections requires discipline. We used Go's select statements and channels to ensure 
-              we never block the main thread.
-            </p>
-            <ul className="list-disc pl-5 space-y-2 text-slate-400">
-              <li><strong>ReadPump:</strong> Dedicated goroutine for reading messages from the socket.</li>
-              <li><strong>WritePump:</strong> Dedicated goroutine for pushing messages to the socket.</li>
-              <li><strong>Hub:</strong> A central structure managing the register/unregister events.</li>
-            </ul>
-          </div>
-        </div>
+        ) : (
+          <article className="prose prose-invert prose-lg max-w-none prose-headings:text-sky-100 prose-a:text-sky-400 prose-code:text-emerald-300 prose-code:bg-slate-900/50 prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-pre:bg-[#0B1220] prose-pre:border prose-pre:border-slate-800">
+            <ReactMarkdown remarkPlugins={[remarkGfm]}>
+              {content}
+            </ReactMarkdown>
+          </article>
+        )}
       </div>
     </motion.div>
   );
@@ -529,6 +511,7 @@ export default function Landing() {
             <span className="font-bold text-lg tracking-tight text-white">ChatterStack</span>
           </div>
 
+          {/* Desktop Nav */}
           <div className="hidden md:flex items-center gap-8">
             <button 
               onClick={() => setView('home')}
@@ -542,15 +525,22 @@ export default function Landing() {
             >
               The Journey
             </button>
-            <a href="https://github.com/Amaankaa/chatterstack-frontend/blob/main/API_documentation.md" target="_blank" rel="noreferrer" className="text-sm font-medium text-slate-400 hover:text-sky-400 transition-colors">
+            <a href={URLS.docs} target="_blank" rel="noreferrer" className="text-sm font-medium text-slate-400 hover:text-sky-400 transition-colors">
               Docs
             </a>
           </div>
 
+          {/* Auth Actions */}
           <div className="flex items-center gap-3">
-             <Button size="sm" className="bg-white text-slate-900 hover:bg-slate-200 hidden sm:flex">
-               <a href="https://github.com/Amaankaa/chatterstack-frontend" target="_blank" rel="noreferrer">
-                 Get Repo
+             <Button asChild size="sm" variant="ghost" className="text-slate-300 hover:text-white hover:bg-slate-800 hidden sm:flex">
+               <a href={URLS.login} target="_blank" rel="noreferrer">
+                 <LogIn className="w-4 h-4 mr-2" />
+                 Sign In
+               </a>
+             </Button>
+             <Button asChild size="sm" className="bg-sky-500 hover:bg-sky-600 text-white font-semibold shadow-lg shadow-sky-500/20">
+               <a href={URLS.register} target="_blank" rel="noreferrer">
+                 Get Started
                </a>
              </Button>
           </div>
@@ -578,8 +568,8 @@ export default function Landing() {
               <div>
                 <h3 className="text-3xl font-bold text-white mb-4">Let's Build Something Amazing.</h3>
                 <p className="text-slate-300 mb-6">
-                  Have a question about the stack? Need a freelancer to implement this for your business? 
-                  I am available for contract work and consulting.
+                  Ready to see it in action? Create an account to test the real-time websocket capabilities, 
+                  or hire me to implement this stack for your business.
                 </p>
                 
                 <div className="flex flex-col sm:flex-row gap-4">
@@ -605,21 +595,24 @@ export default function Landing() {
                     rel="noreferrer"
                     className="flex items-center justify-center px-6 py-3 rounded-lg bg-[#0077b5]/20 border border-[#0077b5]/50 text-[#0077b5] hover:bg-[#0077b5]/30 transition-colors"
                   >
-                    <LinkedinIcon className="w-5 h-5 mr-2" /> LinkedIn
+                    <Linkedin className="w-5 h-5 mr-2" /> LinkedIn
                   </a>
                 </div>
               </div>
               
               <div className="rounded-xl bg-black/30 p-6 border border-white/10 text-center">
-                <p className="text-sm text-slate-400 mb-2">Clone the template</p>
-                <code className="block bg-black/50 p-4 rounded-lg text-sky-400 font-mono text-sm mb-4 border border-slate-800">
-                  git clone https://github.com/Amaankaa/chatterstack-frontend.git
-                </code>
-                <Button className="w-full bg-white text-black hover:bg-slate-200">
-                  <a href="https://github.com/Amaankaa/chatterstack-frontend" target="_blank" rel="noreferrer" className="flex items-center justify-center w-full">
-                    <GithubIcon className="w-4 h-4 mr-2" /> Star the Repo
-                  </a>
-                </Button>
+                <p className="text-sm text-slate-400 mb-2">Try the live demo</p>
+                <div className="flex gap-4 mb-4">
+                  <Button className="w-full bg-white text-black hover:bg-slate-200">
+                    <a href={URLS.register} target="_blank" rel="noreferrer" className="flex items-center justify-center w-full">
+                      <Zap className="w-4 h-4 mr-2" /> Create Account
+                    </a>
+                  </Button>
+                </div>
+                <div className="text-xs text-slate-500 flex items-center justify-center gap-2">
+                   <span>or</span>
+                   <a href={URLS.login} target="_blank" rel="noreferrer" className="text-sky-400 hover:underline">Log In</a>
+                </div>
               </div>
             </div>
           </div>
@@ -638,8 +631,8 @@ export default function Landing() {
             </div>
             
             <div className="flex gap-6 text-sm text-slate-500">
-               <a href="https://github.com/Amaankaa" target="_blank" rel="noreferrer" className="hover:text-white transition-colors">GitHub</a>
-               <a href="https://www.linkedin.com/in/amanuel-merara-3bb71a36a" target="_blank" rel="noreferrer" className="hover:text-white transition-colors">LinkedIn</a>
+               <a href={URLS.repo} target="_blank" rel="noreferrer" className="hover:text-white transition-colors">GitHub</a>
+               <a href={URLS.docs} target="_blank" rel="noreferrer" className="hover:text-white transition-colors">Docs</a>
                <a href="mailto:contact@amanuel.dev" className="hover:text-white transition-colors">Email</a>
             </div>
           </div>
