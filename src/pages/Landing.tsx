@@ -3,14 +3,14 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Github,
+  GithubIcon,
   Zap,
   Copy,
   Check,
   Globe,
   Shield,
   Send,
-  Linkedin,
+  LinkedinIcon,
   MessageCircle, 
   FileType,
   Layout,
@@ -302,8 +302,16 @@ const LandingView = ({ onReadJourney }: { onReadJourney: () => void }) => {
                     rel="noreferrer"
                     className="inline-flex items-center"
                   >
-                    <Github className="mr-2 h-4 w-4" /> GitHub
+                    <GithubIcon className="mr-2 h-4 w-4" /> GitHub
                   </a>
+                </Button>
+                <Button
+                  size="lg"
+                  variant="ghost"
+                  className="border border-transparent text-slate-300 hover:text-white hover:border-slate-700"
+                  onClick={onReadJourney}
+                >
+                  Read the Journey
                 </Button>
               </div>
 
@@ -595,7 +603,7 @@ export default function Landing() {
                     rel="noreferrer"
                     className="flex items-center justify-center px-6 py-3 rounded-lg bg-[#0077b5]/20 border border-[#0077b5]/50 text-[#0077b5] hover:bg-[#0077b5]/30 transition-colors"
                   >
-                    <Linkedin className="w-5 h-5 mr-2" /> LinkedIn
+                    <LinkedinIcon className="w-5 h-5 mr-2" /> LinkedIn
                   </a>
                 </div>
               </div>
