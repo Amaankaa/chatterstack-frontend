@@ -65,12 +65,6 @@ export default function Chat() {
 
   // --- 1. Initial Load & Persistence ---
   useEffect(() => {
-    activeRoomRef.current = activeRoom;
-
-    if (activeRoom) {
-      localStorage.setItem('lastActiveRoomId', activeRoom.id);
-    }
-
     const init = async () => {
       try {
         // Fetch ALL rooms (no query) to allow client-side filtering
@@ -211,6 +205,8 @@ export default function Chat() {
 
   // --- 2. Save Active Room on Change ---
   useEffect(() => {
+    activeRoomRef.current = activeRoom;
+    
     if (activeRoom) {
       localStorage.setItem('lastActiveRoomId', activeRoom.id);
       // Reset unread count for the active room when opened
