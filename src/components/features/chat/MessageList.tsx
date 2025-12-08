@@ -1,4 +1,4 @@
-import { useState, useRef, useLayoutEffect } from 'react';
+import { useState, useRef, useLayoutEffect, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -63,6 +63,13 @@ export function MessageList({ activeRoom, dmMap, messages, user, highlightedMsgI
     }
     prevMessagesLengthRef.current = messages.length;
   }, [messages]);
+
+  // Ensure typing indicator is fully visible without manual scroll
+  useEffect(() => {
+    if (typingUsers && typingUsers.size > 0) {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [typingUsers, messagesEndRef]);
 
   const startEditing = (msg: Message) => {
     setEditingId(msg.id);
