@@ -35,8 +35,8 @@ export const useChatWebSocket = (
     // Connect directly to CloudFront (wss) as per backend requirements (Secure WS)
     const wssBase = 'wss://d1176qoi9kdya5.cloudfront.net';
     const qs = new URLSearchParams();
-    // Backend expects 'token' query parameter, not 'access_token'
-    qs.append('token', token);
+    // Backend expects 'access_token' query parameter for CloudFront WS
+    qs.append('access_token', token);
     roomIds.forEach(id => qs.append('room_id', id));
 
     const url = `${wssBase}/ws?${qs.toString()}`;

@@ -15,6 +15,13 @@ export const api = axios.create({
   headers: { 'Content-Type': 'application/json' },
 });
 
+// Helper to choose the right header based on base URL
+function authHeader(baseURL: string | undefined, token: string) {
+  const isCF = baseURL && /cloudfront\.net/i.test(baseURL);
+  // CloudFront expects raw token in X-Auth-Token; others expect Bearer in Authorization
+  return isCF ? { 'X-Auth-Token': token } : { Authorization: 'Bearer ' + token };
+}
+
 // Attach token to every request, except for public endpoints
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('access_token');
@@ -23,7 +30,8 @@ api.interceptors.request.use((config) => {
   const isPublic = publicEndpoints.some(endpoint => config.url?.includes(endpoint));
 
   if (token && !isPublic) {
-    config.headers.Authorization = `Bearer ${token}`;
+    const headers = authHeader(config.baseURL, token);
+    config.headers = { ...config.headers, ...headers } as any;
   }
   return config;
 });
