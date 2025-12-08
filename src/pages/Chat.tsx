@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/stores/authStore';
 import { getRooms, createRoom, addRoomMember, createDirectRoom, deleteRoom, getRoomMembers } from '@/api/rooms';
@@ -48,7 +48,7 @@ export default function Chat() {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isSearchingMsg, setIsSearchingMsg] = useState(false);
   const [highlightedMsgId, setHighlightedMsgId] = useState<string | null>(null);
-  const [typingUsers, setTypingUsers] = useState<Set<string>>(new Set());
+  const [typingUsersByRoom, setTypingUsersByRoom] = useState<Map<string, Set<string>>>(new Map());
   const [isLocalTyping, setIsLocalTyping] = useState(false);
   // Unread counts per room
   const [unreadByRoom, setUnreadByRoom] = useState<Map<string, number>>(new Map());
@@ -62,6 +62,10 @@ export default function Chat() {
   // Cache for usernames to avoid repeated API calls
   const userCache = useRef<Map<string, string>>(new Map());
   const activeRoomRef = useRef<Room | null>(null);
+  const activeTypingUsers = useMemo(() => {
+    if (!activeRoom) return new Set<string>();
+    return typingUsersByRoom.get(activeRoom.id) ?? new Set<string>();
+  }, [activeRoom, typingUsersByRoom]);
 
   // --- 1. Initial Load & Persistence ---
   useEffect(() => {
@@ -290,12 +294,18 @@ export default function Chat() {
     });
   }, []);
 
-  const handleTyping = useCallback((username: string, isTyping: boolean) => {
-    setTypingUsers(prev => {
-      const newSet = new Set(prev);
-      if (isTyping) newSet.add(username);
-      else newSet.delete(username);
-      return newSet;
+  const handleTyping = useCallback((username: string, roomId: string, isTyping: boolean) => {
+    if (!roomId) return;
+    setTypingUsersByRoom(prev => {
+      const next = new Map(prev);
+      const existing = next.get(roomId);
+      const roomSet = new Set(existing ? Array.from(existing) : []);
+      if (isTyping) roomSet.add(username);
+      else roomSet.delete(username);
+
+      if (roomSet.size === 0) next.delete(roomId);
+      else next.set(roomId, roomSet);
+      return next;
     });
   }, []);
 
@@ -673,7 +683,7 @@ export default function Chat() {
           isDeleteRoomOpen={isDeleteRoomOpen}
           setIsDeleteRoomOpen={setIsDeleteRoomOpen}
           handleDeleteRoom={handleDeleteRoom}
-          typingUsers={typingUsers}
+          typingUsers={activeTypingUsers}
           isLocalTyping={isLocalTyping}
         />
 
@@ -692,7 +702,7 @@ export default function Chat() {
               onLoadMore={handleLoadMore}
               hasMore={hasMore}
               isLoadingMore={isLoadingMore}
-              typingUsers={typingUsers}
+              typingUsers={activeTypingUsers}
               isLocalTyping={isLocalTyping}
             />
 

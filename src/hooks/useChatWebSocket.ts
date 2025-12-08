@@ -5,7 +5,7 @@ import { Message, Room } from '@/types';
 export const useChatWebSocket = (
   roomIds: string[], 
   onMessageReceived: (msg: Message) => void,
-  onTyping?: (username: string, isTyping: boolean) => void,
+  onTyping?: (username: string, roomId: string, isTyping: boolean) => void,
   onMessageDeleted?: (msgId: string) => void,
   onRoomAdded?: (room: Room) => void
 ) => {
@@ -70,12 +70,12 @@ export const useChatWebSocket = (
              type: 'text'
           };
           onMessageReceived(incomingMsg);
-        } else if (payload.event === 'typing_start' && onTyping) {
-            const username = payload.data?.username || payload.username;
-            if (username) onTyping(username, true);
-        } else if (payload.event === 'typing_stop' && onTyping) {
-            const username = payload.data?.username || payload.username;
-            if (username) onTyping(username, false);
+        } else if ((payload.event === 'typing_start' || payload.event === 'typing_stop') && onTyping) {
+          const username = payload.data?.username || payload.username;
+          const roomId = payload.data?.room_id || payload.room_id;
+          if (username && roomId) {
+            onTyping(username, roomId, payload.event === 'typing_start');
+          }
         } else if (payload.event === 'message.deleted' && onMessageDeleted && payload.data?.id) {
             onMessageDeleted(payload.data.id);
         } else if ((payload.event === 'room_added' || payload.event === 'added_to_room') && onRoomAdded && payload.data) {
