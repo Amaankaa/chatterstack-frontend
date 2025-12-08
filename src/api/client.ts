@@ -32,6 +32,11 @@ api.interceptors.request.use((config) => {
   if (token && !isPublic) {
     const headers = authHeader(config.baseURL, token);
     config.headers = { ...config.headers, ...headers } as any;
+    
+    // Explicitly remove Authorization if we are using X-Auth-Token to avoid conflicts
+    if (headers['X-Auth-Token']) {
+      delete config.headers.Authorization;
+    }
   }
   return config;
 });
