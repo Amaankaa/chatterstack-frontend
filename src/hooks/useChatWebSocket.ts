@@ -72,7 +72,14 @@ export const useChatWebSocket = (
           onMessageReceived(incomingMsg);
         } else if ((payload.event === 'typing_start' || payload.event === 'typing_stop') && onTyping) {
           const username = payload.data?.username || payload.username;
-          const roomId = payload.data?.room_id || payload.room_id;
+          const rawRoomId =
+            payload.data?.room_id ??
+            payload.data?.roomId ??
+            payload.room_id ??
+            payload.roomId ??
+            payload.data?.room?.id ??
+            payload.room?.id;
+          const roomId = rawRoomId ? String(rawRoomId) : undefined;
           if (username && roomId) {
             onTyping(username, roomId, payload.event === 'typing_start');
           }
