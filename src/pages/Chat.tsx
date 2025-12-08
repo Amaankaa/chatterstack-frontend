@@ -61,9 +61,16 @@ export default function Chat() {
 
   // Cache for usernames to avoid repeated API calls
   const userCache = useRef<Map<string, string>>(new Map());
+  const activeRoomRef = useRef<Room | null>(null);
 
   // --- 1. Initial Load & Persistence ---
   useEffect(() => {
+    activeRoomRef.current = activeRoom;
+
+    if (activeRoom) {
+      localStorage.setItem('lastActiveRoomId', activeRoom.id);
+    }
+
     const init = async () => {
       try {
         // Fetch ALL rooms (no query) to allow client-side filtering
@@ -245,8 +252,10 @@ export default function Chat() {
   // --- 4. WebSocket Integration ---
   // FIX: Use useCallback to prevent infinite reconnection loop
   const handleIncomingMessage = useCallback(async (incomingMsg: Message) => {
+    const currentActiveRoom = activeRoomRef.current;
+
     // If message belongs to a different room, increment unread count and exit
-    if (!activeRoom || incomingMsg.room_id !== activeRoom.id) {
+    if (!currentActiveRoom || incomingMsg.room_id !== currentActiveRoom.id) {
       setUnreadByRoom(prev => {
         const next = new Map(prev);
         const current = next.get(incomingMsg.room_id) || 0;
