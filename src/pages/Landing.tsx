@@ -1,21 +1,67 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Github,
+  GithubIcon,
   ArrowRight,
-  Server,
-  Database,
-  Shield,
   Zap,
   BookOpen,
   Copy,
   Check,
   Globe,
   Layers,
-  Terminal,
+  Shield,
+  Send,
+  LinkedinIcon,
+  MessageCircle, // WhatsApp style
+  Palette,
+  FileType
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+
+// --- ANIMATION COMPONENTS ---
+
+const Meteors = ({ number = 20 }: { number?: number }) => {
+  const [meteorStyles, setMeteorStyles] = useState<Array<React.CSSProperties>>([]);
+
+  useEffect(() => {
+    const styles = [...new Array(number)].map(() => ({
+      top: -5,
+      left: Math.floor(Math.random() * window.innerWidth) + 'px',
+      animationDelay: Math.random() * 1 + 0.2 + 's',
+      animationDuration: Math.floor(Math.random() * 8 + 2) + 's',
+    }));
+    setMeteorStyles(styles);
+  }, [number]);
+
+  return (
+    <>
+      {meteorStyles.map((style, idx) => (
+        <span
+          key={'meteor' + idx}
+          className={cn(
+            'pointer-events-none absolute left-1/2 top-1/2 h-0.5 w-0.5 rotate-[215deg] animate-meteor rounded-[9999px] bg-slate-500 shadow-[0_0_0_1px_#ffffff10]',
+          )}
+          style={style}
+        >
+          <div className="pointer-events-none absolute top-1/2 -z-10 h-[1px] w-[50px] -translate-y-1/2 bg-gradient-to-r from-slate-500 to-transparent" />
+        </span>
+      ))}
+    </>
+  );
+};
+
+const BackgroundEffects = () => (
+  <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
+    <div className="absolute inset-0 bg-[#0B1220]" />
+    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[500px] bg-sky-500/10 rounded-full blur-[120px] opacity-50" />
+    <div className="absolute bottom-0 right-0 w-[800px] h-[600px] bg-emerald-500/5 rounded-full blur-[100px] opacity-30" />
+    <Meteors number={25} />
+    <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 brightness-100 contrast-150 mix-blend-overlay"></div>
+  </div>
+);
+
+// --- DATA CONSTANTS ---
 
 const FEATURES = [
   {
@@ -25,9 +71,9 @@ const FEATURES = [
     gradient: 'from-yellow-500/20 to-orange-500/20',
   },
   {
-    title: 'Clean Architecture',
-    desc: 'Delivery, usecase, domain, repo layers — readable Go.',
-    icon: <Layers className="w-6 h-6 text-blue-400" />,
+    title: 'Type-Safe Frontend',
+    desc: 'Built with React 18, TypeScript, and Tailwind CSS. Fully typed.',
+    icon: <FileType className="w-6 h-6 text-blue-400" />,
     gradient: 'from-blue-500/20 to-cyan-500/20',
   },
   {
@@ -49,10 +95,10 @@ const FEATURES = [
     gradient: 'from-purple-500/20 to-violet-500/20',
   },
   {
-    title: 'Developer Friendly',
-    desc: 'Simple envs, blazing-fast Go toolchain, batteries included.',
-    icon: <Terminal className="w-6 h-6 text-slate-400" />,
-    gradient: 'from-slate-500/20 to-gray-500/20',
+    title: 'Beautiful UI',
+    desc: 'Styled with Tailwind CSS and animated with Framer Motion.',
+    icon: <Palette className="w-6 h-6 text-pink-400" />,
+    gradient: 'from-pink-500/20 to-rose-500/20',
   },
 ];
 
@@ -62,7 +108,7 @@ const CODE_TABS = [
     label: 'Login (curl)',
     lang: 'bash',
     code: [
-      "curl -s https://d1176qoi9kdya5.cloudfront.net/v1/auth/login \\",
+      "curl -s https://api.chatterstack.com/v1/auth/login \\",
       "  -H 'Content-Type: application/json' \\",
       "  -d '{\"email\":\"user@example.com\",\"password\":\"supersecret\"}'",
       '# → { "access_token": "<jwt>", "refresh_token": "<jwt>" }',
@@ -73,10 +119,10 @@ const CODE_TABS = [
     label: 'Fetch (TS)',
     lang: 'typescript',
     code: [
-      "const CF_BASE = 'https://d1176qoi9kdya5.cloudfront.net/v1';",
+      "const API_BASE = 'https://api.chatterstack.com/v1';",
       '',
       'async function getUserByEmail(email: string, accessToken: string) {',
-      "  const res = await fetch(`${CF_BASE}/users?email=${encodeURIComponent(email)}`, {",
+      "  const res = await fetch(`${API_BASE}/users?email=${encodeURIComponent(email)}`, {",
       "    headers: {",
       "      'Content-Type': 'application/json',",
       "      'X-Auth-Token': accessToken,",
@@ -92,66 +138,32 @@ const CODE_TABS = [
     label: 'WebSocket',
     lang: 'typescript',
     code: [
-      "const CF_WS = 'wss://d1176qoi9kdya5.cloudfront.net/ws';",
+      "const WS_URL = 'wss://api.chatterstack.com/ws';",
       '',
       'function connectWS(accessToken: string, roomIds: string[]) {',
       '  const qs = new URLSearchParams();',
       "  roomIds.forEach((id) => qs.append('room_id', id));",
       "  qs.set('access_token', accessToken);",
       '',
-      '  const ws = new WebSocket(`${CF_WS}?${qs.toString()}`);',
+      '  const ws = new WebSocket(`${WS_URL}?${qs.toString()}`);',
       "  ws.onopen = () => console.log('WS connected');",
       '  ws.onmessage = (event) => console.log(JSON.parse(event.data));',
       '  return ws;',
       '}',
     ].join('\n'),
   },
-  {
-    id: 'openapi',
-    label: 'OpenAPI',
-    lang: 'yaml',
-    code: [
-      'openapi: 3.0.3',
-      'servers:',
-      '  - url: https://d1176qoi9kdya5.cloudfront.net/v1',
-      'components:',
-      '  securitySchemes:',
-      '    XAuthToken:',
-      '      type: apiKey',
-      '      in: header',
-      '      name: X-Auth-Token',
-      'paths:',
-      '  /users:',
-      '    get:',
-      '      security:',
-      '        - XAuthToken: []',
-    ].join('\n'),
-  },
 ];
 
-const TAB_META: Record<string, string> = {
-  curl: 'Edge-friendly headers',
-  fetch: 'Type-safe and copy-ready',
-  ws: 'Query params keep tokens alive',
-  openapi: 'Schema-first docs',
-};
-
-const JOURNEY_HIGHLIGHTS = [
-  {
-    quote:
-      'CloudFront will not forward Authorization headers. We ship X-Auth-Token and document the edge nuance.',
-    tag: 'Edge Auth',
-  },
-  {
-    quote:
-      'WebSockets keep auth too — access_token rides the query string so CloudFront and ALB keep it intact.',
-    tag: 'WS Security',
-  },
-  {
-    quote: 'Redis pub/sub is the glue that lets ECS tasks fan-out messages horizontally without sticky sessions.',
-    tag: 'Scalability',
-  },
+const TECH_STACK = [
+  { name: 'TypeScript', icon: 'TS', color: 'text-blue-400', border: 'border-blue-500/20', bg: 'bg-blue-500/10' },
+  { name: 'React', icon: '⚛️', color: 'text-cyan-400', border: 'border-cyan-500/20', bg: 'bg-cyan-500/10' },
+  { name: 'Tailwind', icon: '🎨', color: 'text-sky-300', border: 'border-sky-500/20', bg: 'bg-sky-500/10' },
+  { name: 'Go', icon: '🐹', color: 'text-cyan-200', border: 'border-cyan-400/20', bg: 'bg-cyan-400/10' },
+  { name: 'Redis', icon: '🔴', color: 'text-red-400', border: 'border-red-500/20', bg: 'bg-red-500/10' },
+  { name: 'AWS', icon: '☁️', color: 'text-orange-400', border: 'border-orange-500/20', bg: 'bg-orange-500/10' },
 ];
+
+// --- UI HELPERS ---
 
 const Typewriter = ({ text, delay = 40 }: { text: string; delay?: number }) => {
   const [rendered, setRendered] = useState('');
@@ -180,8 +192,8 @@ const CodeBlock = ({ code, lang }: { code: string; lang: string }) => {
   };
 
   return (
-    <div className="relative group rounded-xl overflow-hidden bg-[#0F172A] border border-slate-800">
-      <div className="flex items-center justify-between px-4 py-2 bg-slate-900/50 border-b border-slate-800">
+    <div className="relative group rounded-xl overflow-hidden bg-[#0F172A] border border-slate-800 shadow-2xl">
+      <div className="flex items-center justify-between px-4 py-2 bg-slate-900/80 border-b border-slate-800 backdrop-blur">
         <div className="flex space-x-2">
           <div className="w-3 h-3 rounded-full bg-red-500/30" />
           <div className="w-3 h-3 rounded-full bg-yellow-500/30" />
@@ -197,7 +209,7 @@ const CodeBlock = ({ code, lang }: { code: string; lang: string }) => {
       <button
         type="button"
         onClick={handleCopy}
-        className="absolute top-3 right-3 p-2 rounded-lg bg-slate-800/70 text-slate-300 opacity-0 group-hover:opacity-100 transition-all hover:bg-slate-700 hover:text-white"
+        className="absolute top-12 right-3 p-2 rounded-lg bg-slate-800/70 text-slate-300 opacity-0 group-hover:opacity-100 transition-all hover:bg-slate-700 hover:text-white"
       >
         {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
       </button>
@@ -205,16 +217,35 @@ const CodeBlock = ({ code, lang }: { code: string; lang: string }) => {
   );
 };
 
-export default function Landing() {
+const TechStackStrip = () => (
+  <div className="flex flex-wrap gap-3 justify-start opacity-80 pt-6">
+    {TECH_STACK.map((tech) => (
+      <div 
+        key={tech.name} 
+        className={cn(
+          "flex items-center gap-2 px-3 py-1.5 rounded-full border text-xs font-medium backdrop-blur-sm transition-transform hover:scale-105 select-none",
+          tech.border, 
+          tech.bg,
+          tech.color
+        )}
+      >
+        <span>{tech.icon}</span>
+        {tech.name}
+      </div>
+    ))}
+  </div>
+);
+
+// --- VIEWS ---
+
+const LandingView = ({ onReadJourney }: { onReadJourney: () => void }) => {
   const [activeTab, setActiveTab] = useState('curl');
   const activeCode = CODE_TABS.find((tab) => tab.id === activeTab) ?? CODE_TABS[0];
-  const year = new Date().getFullYear();
 
   return (
-    <div className="min-h-screen bg-[#0B1220] text-slate-200 selection:bg-sky-500/30">
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="relative z-10">
       {/* HERO */}
-      <section className="relative pt-32 pb-20 overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-sky-900/20 via-[#0B1220] to-[#0B1220]" />
+      <section className="relative pt-32 pb-20">
         <div className="container relative z-10 mx-auto px-4">
           <div className="grid gap-12 lg:grid-cols-2 lg:items-center">
             <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.6 }}>
@@ -225,69 +256,75 @@ export default function Landing() {
                 </span>
                 v1.0 Production Ready
               </div>
-              <h1 className="mb-6 text-5xl font-bold leading-tight tracking-tight text-white md:text-6xl">
+              <h1 className="mb-6 text-5xl font-bold leading-tight tracking-tight text-white md:text-7xl">
                 Real-time chat,
                 <br />
-                <span className="bg-gradient-to-r from-sky-400 to-emerald-400 bg-clip-text text-transparent">
-                  production-grade backend.
+                <span className="bg-gradient-to-r from-sky-400 via-cyan-400 to-emerald-400 bg-clip-text text-transparent">
+                  React + Go + AWS.
                 </span>
               </h1>
-              <p className="mb-8 text-lg text-slate-400">
-                Go + WebSockets, Redis pub/sub, Postgres, and AWS (CloudFront/ALB/ECS). Clean architecture with tests and docs — ready to learn from and build on.
+              <p className="mb-8 text-lg text-slate-400 max-w-lg">
+                The missing production manual. We combined <strong>TypeScript</strong> and <strong>Tailwind</strong> on the front with 
+                <strong> Go</strong> and <strong>Redis</strong> on the back. Documented so you can skip the infra headaches.
               </p>
-              <div className="flex flex-wrap gap-4">
-                <Button asChild size="lg" className="bg-sky-500 hover:bg-sky-600 text-white font-semibold">
+              
+              <div className="flex flex-wrap gap-4 mb-8">
+                <Button asChild size="lg" className="bg-sky-500 hover:bg-sky-600 text-white font-semibold shadow-lg shadow-sky-500/25">
                   <a
                     href="https://github.com/Amaankaa/chatterstack-frontend"
                     target="_blank"
                     rel="noreferrer"
                     className="inline-flex items-center"
                   >
-                    <Github className="mr-2 h-5 w-5" /> View on GitHub
+                    <GithubIcon className="mr-2 h-5 w-5" /> View on GitHub
                   </a>
                 </Button>
                 <Button
-                  asChild
+                  onClick={onReadJourney}
                   variant="outline"
                   size="lg"
-                  className="border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white"
+                  className="border-slate-700 bg-slate-900/50 text-slate-300 hover:bg-slate-800 hover:text-white backdrop-blur-sm"
                 >
-                  <a
-                    href="https://github.com/Amaankaa/chatterstack-frontend/blob/main/TheJourney.md"
-                    target="_blank"
-                    rel="noreferrer"
-                    className="inline-flex items-center"
-                  >
-                    Read the Journey
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </a>
+                  Read the Journey
+                  <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </div>
+
+              {/* TECH STACK STRIP */}
+              <div className="border-t border-slate-800/50 pt-6">
+                <p className="text-xs uppercase tracking-widest text-slate-500 mb-3">Powering the stack</p>
+                <TechStackStrip />
+              </div>
+
             </motion.div>
+            
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.15 }}
-              className="relative"
+              transition={{ duration: 0.6, delay: 0.2 }}
+              className="relative hidden lg:block"
             >
-              <div className="absolute -inset-1 rounded-2xl bg-gradient-to-r from-sky-500 to-emerald-500 opacity-30 blur" />
-              <div className="relative rounded-2xl border border-slate-800 bg-[#0F172A] shadow-2xl overflow-hidden">
-                <div className="flex items-center gap-2 border-b border-slate-800 px-4 py-3">
-                  <div className="h-3 w-3 rounded-full bg-red-500/40" />
-                  <div className="h-3 w-3 rounded-full bg-yellow-500/40" />
-                  <div className="h-3 w-3 rounded-full bg-green-500/40" />
-                  <span className="ml-2 text-xs text-slate-500">ws-client.ts</span>
+              <div className="absolute -inset-1 rounded-2xl bg-gradient-to-r from-sky-500 to-emerald-500 opacity-20 blur-xl animate-pulse" />
+              <div className="relative rounded-2xl border border-slate-800 bg-[#0B1220]/90 backdrop-blur-xl shadow-2xl overflow-hidden">
+                <div className="flex items-center gap-2 border-b border-slate-800 px-4 py-3 bg-slate-900/50">
+                   <div className="flex gap-1.5">
+                    <div className="h-2.5 w-2.5 rounded-full bg-red-500/60" />
+                    <div className="h-2.5 w-2.5 rounded-full bg-yellow-500/60" />
+                    <div className="h-2.5 w-2.5 rounded-full bg-green-500/60" />
+                   </div>
+                  <span className="ml-3 text-xs text-slate-500 font-mono">ws-client.ts</span>
                 </div>
-                <div className="p-6 font-mono text-sm text-slate-200 space-y-2">
-                  <div>
-                    <span className="text-purple-400">const</span> socket = new WebSocket('wss://api.chatterstack.com/ws');
+                <div className="p-6 font-mono text-sm text-slate-200 space-y-3">
+                  <div><span className="text-purple-400">const</span> socket = new WebSocket(<span className="text-emerald-400">'wss://api.chatterstack.com'</span>);</div>
+                  <div className="pl-4 text-slate-500">// TypeScript & Tailwind Ready</div>
+                  <div>socket.onopen = () =&gt; {'{'} </div>
+                  <div className="pl-4">console.log(<span className="text-yellow-300">'Gateway Connected ⚡'</span>);</div>
+                  <div className="pl-4">socket.send(JSON.stringify({'{'}</div>
+                  <div className="pl-8">event: <span className="text-emerald-400">'message'</span>,</div>
+                  <div className="pl-8">
+                     content: '<Typewriter text="Full stack simplicity." />'
                   </div>
-                  <div>socket.onopen = () =&gt; {'{'} console.log('Connected');</div>
-                  <div>  socket.send(JSON.stringify({'{'} event: 'send_message', data: {'{'}))</div>
-                  <div>
-                    {'    '}content: '<Typewriter text="Hello, world! This is real-time." />'
-                  </div>
-                  <div>  {'}'})</div>
+                  <div className="pl-4">{'}'}));</div>
                   <div>{'}'};</div>
                 </div>
               </div>
@@ -297,7 +334,7 @@ export default function Landing() {
       </section>
 
       {/* FEATURES */}
-      <section className="py-24 bg-[#0B1220]">
+      <section className="py-24">
         <div className="container mx-auto px-4">
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {FEATURES.map((feature, idx) => (
@@ -307,19 +344,19 @@ export default function Landing() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: idx * 0.05 }}
-                className="group relative rounded-2xl border border-slate-800 bg-[#0F172A] p-6 hover:border-slate-600 transition-colors"
+                className="group relative rounded-2xl border border-slate-800 bg-slate-900/20 p-6 hover:bg-slate-800/40 hover:border-slate-700 transition-all backdrop-blur-sm"
               >
                 <div
                   className={cn(
-                    'absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity',
+                    'absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-10 transition-opacity',
                     feature.gradient ? `bg-gradient-to-br ${feature.gradient}` : ''
                   )}
                 />
                 <div className="relative z-10">
-                  <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl border border-slate-700 bg-slate-900/60">
+                  <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl border border-slate-700/50 bg-slate-900/60 shadow-inner">
                     {feature.icon}
                   </div>
-                  <h3 className="text-xl font-semibold text-white mb-1">{feature.title}</h3>
+                  <h3 className="text-xl font-semibold text-white mb-2">{feature.title}</h3>
                   <p className="text-slate-400 text-sm leading-relaxed">{feature.desc}</p>
                 </div>
               </motion.div>
@@ -328,73 +365,15 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ARCHITECTURE */}
-      <section className="py-24 bg-slate-900/30 border-y border-slate-800/40">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold text-white mb-4">Production Architecture</h2>
-            <p className="text-slate-400 max-w-2xl mx-auto">
-              Client → CloudFront → ALB → ECS (API + Hub) → RDS + Redis. Every component pulls its weight so you can focus on product.
-            </p>
-          </div>
-          <div className="relative max-w-4xl mx-auto rounded-3xl border border-slate-800 bg-[#0B1220] p-8 shadow-2xl">
-            <div className="absolute inset-0 rounded-3xl bg-sky-500/5 blur-3xl" />
-            <div className="relative z-10 flex flex-col items-center space-y-8 font-mono text-sm">
-              <div className="px-6 py-3 rounded-lg bg-slate-800 border border-slate-700 text-slate-200">Browser / SPA</div>
-              <ArrowRight className="rotate-90 text-slate-600" />
-              <div className="w-full max-w-md px-6 py-4 rounded-xl bg-purple-900/20 border border-purple-500/40 text-center text-purple-200">
-                CloudFront (REST + WSS)
-                <div className="text-xs text-purple-300/70">Edge cache, header shaping, TLS</div>
-              </div>
-              <ArrowRight className="rotate-90 text-slate-600" />
-              <div className="w-full max-w-md px-6 py-4 rounded-xl bg-orange-900/20 border border-orange-500/40 text-center text-orange-200">
-                Application Load Balancer
-                <div className="text-xs text-orange-300/70">HTTP :8080 · WS :8081</div>
-              </div>
-              <div className="grid w-full gap-6 md:grid-cols-2">
-                <div className="rounded-xl border border-sky-500/30 bg-sky-900/20 p-6 text-sky-100">
-                  <div className="flex items-center font-semibold mb-2">
-                    <Server className="w-4 h-4 mr-2" /> API Service
-                  </div>
-                  <ul className="space-y-1 text-xs text-sky-200/80">
-                    <li>• Gin + JWT middleware</li>
-                    <li>• Rate limiting + tracing</li>
-                    <li>• OpenAPI + Postman</li>
-                  </ul>
-                </div>
-                <div className="rounded-xl border border-sky-500/30 bg-sky-900/20 p-6 text-sky-100">
-                  <div className="flex items-center font-semibold mb-2">
-                    <Zap className="w-4 h-4 mr-2" /> WebSocket Hub
-                  </div>
-                  <ul className="space-y-1 text-xs text-sky-200/80">
-                    <li>• Room directory + presence</li>
-                    <li>• Redis pub/sub relay</li>
-                    <li>• Graceful shutdown hooks</li>
-                  </ul>
-                </div>
-              </div>
-              <div className="grid w-full gap-6 pt-4 md:grid-cols-2 border-t border-dashed border-slate-800">
-                <div className="flex items-center justify-center rounded-xl border border-blue-500/30 bg-blue-900/10 p-4 text-blue-100">
-                  <Database className="w-5 h-5 mr-3" /> RDS PostgreSQL (pgx)
-                </div>
-                <div className="flex items-center justify-center rounded-xl border border-red-500/30 bg-red-900/10 p-4 text-red-100">
-                  <Layers className="w-5 h-5 mr-3" /> Redis 7 (cache + pub/sub)
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* CODE SHOWCASE */}
-      <section className="py-24 bg-[#0B1220]" id="code">
+      <section className="py-24 border-y border-slate-800/30 bg-slate-900/20 backdrop-blur-sm">
         <div className="container mx-auto px-4">
           <div className="grid gap-12 lg:grid-cols-12">
             <div className="lg:col-span-4 space-y-6">
               <h2 className="text-3xl font-bold text-white">
                 Code you can
                 <br />
-                <span className="text-sky-400">actually use.</span>
+                <span className="text-sky-400">copy & ship.</span>
               </h2>
               <p className="text-slate-400">
                 Auth headers, CloudFront behavior, WebSocket auth — everything spelled out with copy-ready snippets.
@@ -403,35 +382,30 @@ export default function Landing() {
                 {CODE_TABS.map((tab) => (
                   <button
                     key={tab.id}
-                    type="button"
                     onClick={() => setActiveTab(tab.id)}
                     className={cn(
-                      'w-full rounded-2xl border px-4 py-3 text-left transition-all',
+                      'w-full rounded-xl border px-4 py-4 text-left transition-all',
                       activeTab === tab.id
-                        ? 'border-sky-500/70 bg-sky-500/10 text-white shadow-lg shadow-sky-900/30'
-                        : 'border-slate-800 bg-slate-900/40 text-slate-400 hover:border-slate-700'
+                        ? 'border-sky-500/50 bg-sky-500/10 text-white shadow-[0_0_20px_-5px_rgba(14,165,233,0.3)]'
+                        : 'border-slate-800 bg-slate-900/40 text-slate-400 hover:border-slate-700 hover:bg-slate-800/50'
                     )}
                   >
                     <div className="flex items-center justify-between">
                       <span className="font-semibold">{tab.label}</span>
-                      <span className="text-xs uppercase tracking-wider text-slate-500">{tab.lang}</span>
+                      <span className="text-xs font-mono text-slate-500">{tab.lang}</span>
                     </div>
-                    <p className="text-xs text-slate-500 mt-1">{TAB_META[tab.id]}</p>
                   </button>
                 ))}
               </div>
-              <p className="text-sm text-slate-500 border-l-2 border-slate-700 pl-4">
-                Each snippet mirrors the real repo and Postman collection so you can copy, paste, and ship without guesswork.
-              </p>
             </div>
             <div className="lg:col-span-8">
               <AnimatePresence mode="wait">
                 <motion.div
                   key={activeCode.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  transition={{ duration: 0.25 }}
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  transition={{ duration: 0.2 }}
                 >
                   <CodeBlock code={activeCode.code} lang={activeCode.lang} />
                 </motion.div>
@@ -440,70 +414,210 @@ export default function Landing() {
           </div>
         </div>
       </section>
+    </motion.div>
+  );
+};
 
-      {/* JOURNEY */}
-      <section className="py-24 bg-gradient-to-b from-[#0B1220] via-[#0d1424] to-[#080c16]">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-14">
-            <h2 className="text-3xl font-bold text-white mb-4">Edge Cases, Documented</h2>
-            <p className="text-slate-400 max-w-2xl mx-auto">
-              Notes pulled straight from The Journey doc — the pitfalls we hit so you do not have to.
+const JourneyView = () => {
+  return (
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }} 
+      animate={{ opacity: 1, y: 0 }} 
+      exit={{ opacity: 0, y: -20 }}
+      className="relative z-10 pt-32 pb-20 container mx-auto px-4 max-w-4xl"
+    >
+      <div className="mb-12 text-center">
+        <div className="inline-block mb-4 px-3 py-1 rounded-full border border-purple-500/30 bg-purple-500/10 text-purple-300 text-xs uppercase tracking-wider">
+          Engineering Logs
+        </div>
+        <h1 className="text-4xl md:text-5xl font-bold text-white mb-6">Building The Beast</h1>
+        <p className="text-slate-400 text-lg max-w-2xl mx-auto">
+          The journey from a "simple chat app" to a distributed system handling thousands of connections. 
+          Here are the pitfalls we hit so you don't have to.
+        </p>
+      </div>
+
+      <div className="space-y-12">
+        {/* CHAPTER 1 */}
+        <div className="p-8 rounded-3xl border border-slate-800 bg-slate-900/40 backdrop-blur-md">
+          <div className="flex items-center gap-4 mb-6">
+            <div className="h-10 w-10 rounded-lg bg-red-500/20 flex items-center justify-center border border-red-500/30">
+              <Shield className="w-5 h-5 text-red-400" />
+            </div>
+            <h2 className="text-2xl font-bold text-white">The CloudFront Header Incident</h2>
+          </div>
+          <div className="prose prose-invert prose-slate max-w-none text-slate-300 leading-relaxed">
+            <p className="mb-4">
+              We deployed the first version with standard Authorization headers. It worked locally. It worked on bare EC2. 
+              But the moment we put it behind CloudFront, all WebSockets failed.
+            </p>
+            <p className="mb-4 border-l-2 border-red-500/50 pl-4 bg-red-900/10 py-2 pr-2 rounded-r">
+              <strong>The Gotcha:</strong> By default, CloudFront strips the <code>Authorization</code> header and doesn't forward cookies 
+              to the origin to improve caching hit rates.
+            </p>
+            <p>
+              <strong>The Fix:</strong> We implemented a dual-strategy. REST APIs use a custom <code>X-Auth-Token</code> header 
+              (which we explicitly allowlisted in CloudFront behaviors), and WebSockets use a query parameter 
+              <code>?access_token=...</code> because browsers don't allow custom headers in the WebSocket handshake constructor.
             </p>
           </div>
-          <div className="grid gap-6 md:grid-cols-3">
-            {JOURNEY_HIGHLIGHTS.map((item, idx) => (
-              <motion.div
-                key={item.tag}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: idx * 0.08 }}
-                className="rounded-2xl border border-slate-800 bg-slate-900/40 p-6 backdrop-blur"
-              >
-                <span className="text-xs uppercase tracking-wider text-slate-500">{item.tag}</span>
-                <p className="mt-4 text-lg text-slate-200 leading-relaxed">{item.quote}</p>
-              </motion.div>
-            ))}
+        </div>
+
+        {/* CHAPTER 2 */}
+        <div className="p-8 rounded-3xl border border-slate-800 bg-slate-900/40 backdrop-blur-md">
+          <div className="flex items-center gap-4 mb-6">
+            <div className="h-10 w-10 rounded-lg bg-blue-500/20 flex items-center justify-center border border-blue-500/30">
+              <Layers className="w-5 h-5 text-blue-400" />
+            </div>
+            <h2 className="text-2xl font-bold text-white">Redis Pub/Sub: The Glue</h2>
+          </div>
+          <div className="prose prose-invert prose-slate max-w-none text-slate-300 leading-relaxed">
+            <p className="mb-4">
+              Scaling ECS tasks horizontally created a problem: If Alice is connected to <em>Server A</em> and Bob is connected to <em>Server B</em>, 
+              how does Server A send a message to Bob?
+            </p>
+            <p>
+              We used Redis Pub/Sub as a message bus. Every Go instance subscribes to a specific Redis channel based on active rooms. 
+              When a message comes in, it's published to Redis, fan-out occurs, and the relevant Go instance pushes it down the WebSocket.
+              This allows us to scale ECS tasks from 1 to 100 without sticky sessions.
+            </p>
           </div>
         </div>
-      </section>
 
-      {/* CTA */}
-      <section className="py-24">
+        {/* CHAPTER 3 */}
+        <div className="p-8 rounded-3xl border border-slate-800 bg-slate-900/40 backdrop-blur-md">
+           <div className="flex items-center gap-4 mb-6">
+            <div className="h-10 w-10 rounded-lg bg-emerald-500/20 flex items-center justify-center border border-emerald-500/30">
+              <Check className="w-5 h-5 text-emerald-400" />
+            </div>
+            <h2 className="text-2xl font-bold text-white">Go Concurrency Patterns</h2>
+          </div>
+          <div className="prose prose-invert prose-slate max-w-none text-slate-300 leading-relaxed">
+            <p className="mb-4">
+              Managing thousands of connections requires discipline. We used Go's select statements and channels to ensure 
+              we never block the main thread.
+            </p>
+            <ul className="list-disc pl-5 space-y-2 text-slate-400">
+              <li><strong>ReadPump:</strong> Dedicated goroutine for reading messages from the socket.</li>
+              <li><strong>WritePump:</strong> Dedicated goroutine for pushing messages to the socket.</li>
+              <li><strong>Hub:</strong> A central structure managing the register/unregister events.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </motion.div>
+  );
+};
+
+// --- MAIN LAYOUT ---
+
+export default function Landing() {
+  const [view, setView] = useState<'home' | 'journey'>('home');
+  const year = new Date().getFullYear();
+
+  return (
+    <div className="min-h-screen bg-[#0B1220] text-slate-200 selection:bg-sky-500/30 font-sans">
+      <BackgroundEffects />
+      
+      {/* NAVBAR */}
+      <nav className="fixed top-0 left-0 right-0 z-50 border-b border-white/5 bg-[#0B1220]/70 backdrop-blur-md">
+        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
+          <div className="flex items-center gap-2 cursor-pointer" onClick={() => setView('home')}>
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-sky-500 to-emerald-500 flex items-center justify-center">
+              <Zap className="w-5 h-5 text-white fill-current" />
+            </div>
+            <span className="font-bold text-lg tracking-tight text-white">ChatterStack</span>
+          </div>
+
+          <div className="hidden md:flex items-center gap-8">
+            <button 
+              onClick={() => setView('home')}
+              className={cn("text-sm font-medium transition-colors hover:text-sky-400", view === 'home' ? 'text-white' : 'text-slate-400')}
+            >
+              Product
+            </button>
+            <button 
+              onClick={() => setView('journey')}
+              className={cn("text-sm font-medium transition-colors hover:text-sky-400", view === 'journey' ? 'text-white' : 'text-slate-400')}
+            >
+              The Journey
+            </button>
+            <a href="https://github.com/Amaankaa/chatterstack-frontend/blob/main/API_documentation.md" target="_blank" rel="noreferrer" className="text-sm font-medium text-slate-400 hover:text-sky-400 transition-colors">
+              Docs
+            </a>
+          </div>
+
+          <div className="flex items-center gap-3">
+             <Button size="sm" className="bg-white text-slate-900 hover:bg-slate-200 hidden sm:flex">
+               <a href="https://github.com/Amaankaa/chatterstack-frontend" target="_blank" rel="noreferrer">
+                 Get Repo
+               </a>
+             </Button>
+          </div>
+        </div>
+      </nav>
+
+      <main className="relative">
+        <AnimatePresence mode="wait">
+          {view === 'home' ? (
+            <LandingView key="home" onReadJourney={() => setView('journey')} />
+          ) : (
+            <JourneyView key="journey" />
+          )}
+        </AnimatePresence>
+      </main>
+
+      {/* CTA SECTION */}
+      <section className="relative py-24 z-10">
         <div className="container mx-auto px-4">
-          <div className="relative overflow-hidden rounded-3xl border border-slate-800 bg-gradient-to-r from-sky-600/20 via-cyan-500/10 to-emerald-500/20 px-8 py-12">
-            <div className="absolute inset-0 opacity-40 bg-[radial-gradient(circle_at_top,_rgba(14,165,233,0.35),_transparent_60%)]" />
-            <div className="relative z-10 grid gap-8 md:grid-cols-2 md:items-center">
+          <div className="relative overflow-hidden rounded-3xl border border-slate-700 bg-gradient-to-b from-slate-800 to-slate-900 px-8 py-12 shadow-2xl">
+            {/* Glow effect */}
+            <div className="absolute -top-24 -right-24 w-64 h-64 bg-sky-500/20 rounded-full blur-3xl" />
+            
+            <div className="relative z-10 grid gap-12 lg:grid-cols-2 lg:items-center">
               <div>
-                <p className="text-xs uppercase tracking-[0.25em] text-slate-300">Launch Ready</p>
-                <h3 className="mt-4 text-3xl font-semibold text-white">Spin up chat ops in minutes.</h3>
-                <p className="mt-4 text-slate-200">
-                  Clone, seed, and you are speaking WebSocket in under ten minutes. Ship ideas, not infra tickets.
-                  <span className="ml-2 inline-flex items-center text-xs text-slate-400">
-                    <code className="bg-slate-900/70 px-2 py-1 rounded border border-slate-700">make compose</code>
-                  </span>
+                <h3 className="text-3xl font-bold text-white mb-4">Let's Build Something Amazing.</h3>
+                <p className="text-slate-300 mb-6">
+                  Have a question about the stack? Need a freelancer to implement this for your business? 
+                  I am available for contract work and consulting.
                 </p>
-              </div>
-              <div className="flex flex-col gap-4 sm:flex-row sm:justify-end">
-                <Button asChild size="lg" className="bg-white text-slate-900 hover:bg-slate-100 font-semibold">
-                  <a href="https://github.com/Amaankaa/chatterstack-frontend" target="_blank" rel="noreferrer">
-                    Get the Repo
-                  </a>
-                </Button>
-                <Button
-                  asChild
-                  size="lg"
-                  variant="outline"
-                  className="border-slate-700 text-white hover:bg-slate-900"
-                >
-                  <a
-                    href="https://github.com/Amaankaa/chatterstack-frontend/blob/main/API_documentation.md"
-                    target="_blank"
+                
+                <div className="flex flex-col sm:flex-row gap-4">
+                  <a 
+                    href="https://t.me/Amunishan" 
+                    target="_blank" 
                     rel="noreferrer"
-                    className="inline-flex items-center"
+                    className="flex items-center justify-center px-6 py-3 rounded-lg bg-[#229ED9]/20 border border-[#229ED9]/50 text-[#229ED9] hover:bg-[#229ED9]/30 transition-colors"
                   >
-                    API Deep Dive
-                    <ArrowRight className="w-4 h-4 ml-2" />
+                    <Send className="w-5 h-5 mr-2" /> Telegram
+                  </a>
+                  <a 
+                    href="https://wa.me/251939163487" 
+                    target="_blank" 
+                    rel="noreferrer"
+                    className="flex items-center justify-center px-6 py-3 rounded-lg bg-[#25D366]/20 border border-[#25D366]/50 text-[#25D366] hover:bg-[#25D366]/30 transition-colors"
+                  >
+                    <MessageCircle className="w-5 h-5 mr-2" /> WhatsApp
+                  </a>
+                  <a 
+                    href="https://www.linkedin.com/in/amanuel-merara-3bb71a36a" 
+                    target="_blank" 
+                    rel="noreferrer"
+                    className="flex items-center justify-center px-6 py-3 rounded-lg bg-[#0077b5]/20 border border-[#0077b5]/50 text-[#0077b5] hover:bg-[#0077b5]/30 transition-colors"
+                  >
+                    <LinkedinIcon className="w-5 h-5 mr-2" /> LinkedIn
+                  </a>
+                </div>
+              </div>
+              
+              <div className="rounded-xl bg-black/30 p-6 border border-white/10 text-center">
+                <p className="text-sm text-slate-400 mb-2">Clone the template</p>
+                <code className="block bg-black/50 p-4 rounded-lg text-sky-400 font-mono text-sm mb-4 border border-slate-800">
+                  git clone https://github.com/Amaankaa/chatterstack-frontend.git
+                </code>
+                <Button className="w-full bg-white text-black hover:bg-slate-200">
+                  <a href="https://github.com/Amaankaa/chatterstack-frontend" target="_blank" rel="noreferrer" className="flex items-center justify-center w-full">
+                    <GithubIcon className="w-4 h-4 mr-2" /> Star the Repo
                   </a>
                 </Button>
               </div>
@@ -512,34 +626,22 @@ export default function Landing() {
         </div>
       </section>
 
-      <footer className="border-t border-slate-800/60 py-10">
-        <div className="container mx-auto px-4 flex flex-col gap-6 text-slate-500 text-sm md:flex-row md:items-center md:justify-between">
-          <p>ChatterStack • Crafted in public • {year}</p>
-          <div className="flex gap-6">
-            <a
-              href="https://github.com/Amaankaa/chatterstack-frontend/blob/main/API_documentation.md"
-              target="_blank"
-              rel="noreferrer"
-              className="hover:text-slate-300"
-            >
-              Docs
-            </a>
-            <a
-              href="https://github.com/Amaankaa/chatterstack-frontend/blob/main/README.md"
-              target="_blank"
-              rel="noreferrer"
-              className="hover:text-slate-300"
-            >
-              README
-            </a>
-            <a
-              href="https://github.com/Amaankaa/chatterstack-frontend/blob/main/TheJourney.md"
-              target="_blank"
-              rel="noreferrer"
-              className="hover:text-slate-300"
-            >
-              Journey
-            </a>
+      {/* FOOTER */}
+      <footer className="relative z-10 border-t border-slate-800/60 py-10 bg-[#0B1220]">
+        <div className="container mx-auto px-4">
+          <div className="flex flex-col gap-6 items-center justify-between md:flex-row">
+            <div className="flex items-center gap-2">
+              <div className="h-6 w-6 rounded bg-gradient-to-br from-sky-500 to-emerald-500 flex items-center justify-center">
+                <span className="text-[10px] font-bold text-white">C</span>
+              </div>
+              <p className="text-slate-500 text-sm">ChatterStack • Amanuel Merara • {year}</p>
+            </div>
+            
+            <div className="flex gap-6 text-sm text-slate-500">
+               <a href="https://github.com/Amaankaa" target="_blank" rel="noreferrer" className="hover:text-white transition-colors">GitHub</a>
+               <a href="https://www.linkedin.com/in/amanuel-merara-3bb71a36a" target="_blank" rel="noreferrer" className="hover:text-white transition-colors">LinkedIn</a>
+               <a href="mailto:contact@amanuel.dev" className="hover:text-white transition-colors">Email</a>
+            </div>
           </div>
         </div>
       </footer>
