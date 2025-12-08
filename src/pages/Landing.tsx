@@ -15,19 +15,18 @@ import {
   FileType,
   Layout,
   Activity,
-  Loader2, // Added for loading state
   LogIn
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import journeyMarkdown from '../../TheJourney.md?raw';
 
 // --- CONFIG ---
 const URLS = {
   register: "https://chatterstack.vercel.app/register",
   login: "https://chatterstack.vercel.app/login",
   repo: "https://github.com/Amaankaa/ChatterStack",
-  docs: "https://github.com/Amaankaa/ChatterStack/blob/main/API_documentation.md",
-  rawJourney: "https://raw.githubusercontent.com/Amaankaa/ChatterStack/main/TheJourney.md"
+  docs: "https://github.com/Amaankaa/ChatterStack/blob/main/API_documentation.md"
 };
 
 // --- ANIMATION COMPONENTS ---
@@ -283,8 +282,6 @@ const LandingView = ({ onReadJourney }: { onReadJourney: () => void }) => {
                 <Button asChild size="lg" className="bg-sky-500 hover:bg-sky-600 text-white font-semibold shadow-lg shadow-sky-500/25">
                   <a
                     href={URLS.register}
-                    target="_blank"
-                    rel="noreferrer"
                     className="inline-flex items-center"
                   >
                     <Zap className="mr-2 h-5 w-5" /> Get Started
@@ -444,26 +441,6 @@ const LandingView = ({ onReadJourney }: { onReadJourney: () => void }) => {
 };
 
 const JourneyView = () => {
-  const [content, setContent] = useState('');
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    fetch(URLS.rawJourney)
-      .then((res) => {
-        if (!res.ok) throw new Error('Failed to load journey');
-        return res.text();
-      })
-      .then((text) => {
-        setContent(text);
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.error("Failed to fetch journey", err);
-        setContent("# Error Loading Content\nCould not fetch the logs from GitHub. Please check the repo directly.");
-        setLoading(false);
-      });
-  }, []);
-
   return (
     <motion.div 
       initial={{ opacity: 0, y: 20 }} 
@@ -482,18 +459,11 @@ const JourneyView = () => {
       </div>
 
       <div className="p-8 md:p-12 rounded-3xl border border-slate-800 bg-slate-900/40 backdrop-blur-md min-h-[400px] shadow-2xl">
-        {loading ? (
-          <div className="flex flex-col items-center justify-center h-64 text-slate-500">
-            <Loader2 className="w-8 h-8 animate-spin mb-4 text-sky-500" />
-            <p className="animate-pulse">Fetching logs from GitHub...</p>
-          </div>
-        ) : (
-          <article className="prose prose-invert prose-lg max-w-none prose-headings:text-sky-100 prose-a:text-sky-400 prose-code:text-emerald-300 prose-code:bg-slate-900/50 prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-pre:bg-[#0B1220] prose-pre:border prose-pre:border-slate-800">
-            <ReactMarkdown remarkPlugins={[remarkGfm]}>
-              {content}
-            </ReactMarkdown>
-          </article>
-        )}
+        <article className="prose prose-invert prose-lg max-w-none prose-headings:text-sky-100 prose-a:text-sky-400 prose-code:text-emerald-300 prose-code:bg-slate-900/50 prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-pre:bg-[#0B1220] prose-pre:border prose-pre:border-slate-800">
+          <ReactMarkdown remarkPlugins={[remarkGfm]}>
+            {journeyMarkdown}
+          </ReactMarkdown>
+        </article>
       </div>
     </motion.div>
   );
@@ -541,13 +511,13 @@ export default function Landing() {
           {/* Auth Actions */}
           <div className="flex items-center gap-3">
              <Button asChild size="sm" variant="ghost" className="text-slate-300 hover:text-white hover:bg-slate-800 hidden sm:flex">
-               <a href={URLS.login} target="_blank" rel="noreferrer">
+               <a href={URLS.login}>
                  <LogIn className="w-4 h-4 mr-2" />
                  Sign In
                </a>
              </Button>
              <Button asChild size="sm" className="bg-sky-500 hover:bg-sky-600 text-white font-semibold shadow-lg shadow-sky-500/20">
-               <a href={URLS.register} target="_blank" rel="noreferrer">
+               <a href={URLS.register}>
                  Get Started
                </a>
              </Button>
@@ -612,14 +582,14 @@ export default function Landing() {
                 <p className="text-sm text-slate-400 mb-2">Try the live demo</p>
                 <div className="flex gap-4 mb-4">
                   <Button className="w-full bg-white text-black hover:bg-slate-200">
-                    <a href={URLS.register} target="_blank" rel="noreferrer" className="flex items-center justify-center w-full">
+                    <a href={URLS.register} className="flex items-center justify-center w-full">
                       <Zap className="w-4 h-4 mr-2" /> Create Account
                     </a>
                   </Button>
                 </div>
                 <div className="text-xs text-slate-500 flex items-center justify-center gap-2">
                    <span>or</span>
-                   <a href={URLS.login} target="_blank" rel="noreferrer" className="text-sky-400 hover:underline">Log In</a>
+                   <a href={URLS.login} className="text-sky-400 hover:underline">Log In</a>
                 </div>
               </div>
             </div>
@@ -641,7 +611,7 @@ export default function Landing() {
             <div className="flex gap-6 text-sm text-slate-500">
                <a href={URLS.repo} target="_blank" rel="noreferrer" className="hover:text-white transition-colors">GitHub</a>
                <a href={URLS.docs} target="_blank" rel="noreferrer" className="hover:text-white transition-colors">Docs</a>
-               <a href="mailto:contact@amanuel.dev" className="hover:text-white transition-colors">Email</a>
+               <a href="mailto:amanuel.merara@gmail.com" className="hover:text-white transition-colors">Email</a>
             </div>
           </div>
         </div>
