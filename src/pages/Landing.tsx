@@ -1,6 +1,4 @@
 import { useState, useEffect, useRef } from 'react';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   GithubIcon,
@@ -20,7 +18,6 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import journeyMarkdown from '../../TheJourney.md?raw';
 
 const FEATURES = [
   {
@@ -516,44 +513,6 @@ const LandingView = ({ onReadJourney, setSectionRef }: { onReadJourney: () => vo
   );
 };
 
-const JourneyView = ({ setSectionRef }: { setSectionRef: (id: SectionId) => (el: HTMLElement | null) => void }) => {
-  return (
-    <motion.div 
-      id="journey"
-      ref={setSectionRef('journey')}
-      initial={{ opacity: 0, y: 20 }} 
-      animate={{ opacity: 1, y: 0 }} 
-      exit={{ opacity: 0, y: -20 }}
-      className="relative z-10 pt-32 pb-20 container mx-auto px-4 max-w-4xl"
-    >
-      <div className="mb-12 text-center">
-        <div className="inline-block mb-4 px-3 py-1 rounded-full border border-purple-500/30 bg-purple-500/10 text-purple-300 text-xs uppercase tracking-wider">
-          Engineering Logs
-        </div>
-        <h1 className="text-4xl md:text-5xl font-bold text-white mb-6">The Journey</h1>
-        <p className="text-slate-400 text-lg max-w-2xl mx-auto">
-          The pitfalls we hit so you don't have to. Rendered from the repo—want the canonical view? Read it on GitHub.
-        </p>
-        <div className="mt-4 flex justify-center">
-          <Button asChild variant="ghost" className="text-slate-300 hover:text-white border border-slate-800/50 bg-slate-900/40">
-            <a href={`${URLS.repo}/blob/main/TheJourney.md`} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2">
-              <GithubIcon className="w-4 h-4" /> Open in GitHub
-            </a>
-          </Button>
-        </div>
-      </div>
-
-      <div className="p-8 md:p-12 rounded-3xl border border-slate-800 bg-slate-900/40 backdrop-blur-md min-h-[400px] shadow-2xl">
-        <article className="prose prose-invert prose-lg max-w-none prose-headings:text-sky-100 prose-a:text-sky-400 prose-code:text-emerald-300 prose-code:bg-slate-900/50 prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-pre:bg-[#0B1220] prose-pre:border prose-pre:border-slate-800">
-          <ReactMarkdown remarkPlugins={[remarkGfm]}>
-            {journeyMarkdown}
-          </ReactMarkdown>
-        </article>
-      </div>
-    </motion.div>
-  );
-};
-
 const TestimonialsSection = ({ setSectionRef }: { setSectionRef: (id: SectionId) => (el: HTMLElement | null) => void }) => (
   <section
     id="testimonials"
@@ -738,7 +697,6 @@ export default function Landing() {
 
       <main className="relative">
         <LandingView onReadJourney={() => scrollToSection('journey')} setSectionRef={setSectionRef} />
-        <JourneyView setSectionRef={setSectionRef} />
         <TestimonialsSection setSectionRef={setSectionRef} />
         <TechStackSection setSectionRef={setSectionRef} />
 
