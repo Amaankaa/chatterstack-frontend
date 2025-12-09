@@ -14,7 +14,9 @@ import {
   Activity,
   LogIn,
   Quote,
-  Star
+  Star,
+  BookOpen,
+  ArrowRight,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -321,7 +323,7 @@ const SectionTabs = ({ activeId, onSelect }: { activeId: SectionId; onSelect: (i
 
 // --- VIEWS ---
 
-const LandingView = ({ onReadJourney, setSectionRef }: { onReadJourney: () => void; setSectionRef: (id: SectionId) => (el: HTMLElement | null) => void }) => {
+const LandingView = ({ setSectionRef }: { setSectionRef: (id: SectionId) => (el: HTMLElement | null) => void }) => {
   const [activeTab, setActiveTab] = useState('curl');
   const activeCode = CODE_TABS.find((tab) => tab.id === activeTab) ?? CODE_TABS[0];
 
@@ -347,7 +349,7 @@ const LandingView = ({ onReadJourney, setSectionRef }: { onReadJourney: () => vo
                 </span>
               </h1>
               <p className="mb-8 text-lg text-slate-300 max-w-xl">
-                A production-grade template with real-time presence, bulletproof auth, and cloud architecture already wired. Trade sprints for hours.
+                A production-grade template with real-time presence, bulletproof auth, and cloud architecture already wired. Trade sprints for hours—and audit the full build log before you plug it in.
               </p>
               
               <div className="flex flex-wrap gap-4 mb-8">
@@ -375,12 +377,14 @@ const LandingView = ({ onReadJourney, setSectionRef }: { onReadJourney: () => vo
                   </a>
                 </Button>
                 <Button
+                  asChild
                   size="lg"
                   variant="ghost"
                   className="border border-transparent text-slate-300 hover:text-white hover:border-slate-700"
-                  onClick={onReadJourney}
                 >
-                  Read the build log
+                  <a href={`${URLS.repo}/blob/main/TheJourney.md`} target="_blank" rel="noreferrer" className="inline-flex items-center">
+                    <BookOpen className="mr-2 h-4 w-4" /> Read the build log
+                  </a>
                 </Button>
               </div>
 
@@ -688,61 +692,121 @@ export default function Landing() {
       <SectionTabs activeId={activeSection} onSelect={scrollToSection} />
 
       <main className="relative">
+        <LandingView setSectionRef={setSectionRef} />
         <TestimonialsSection setSectionRef={setSectionRef} />
         <TechStackSection setSectionRef={setSectionRef} />
 
         {/* CTA SECTION */}
         <section id="cta" ref={setSectionRef('cta')} className="relative py-24 z-10">
           <div className="container mx-auto px-4">
-            <div className="relative overflow-hidden rounded-3xl border border-slate-700 bg-gradient-to-br from-sky-600/10 via-slate-900 to-emerald-500/10 px-8 py-12 shadow-2xl">
-              <div className="absolute -top-32 -right-20 w-72 h-72 bg-sky-500/20 rounded-full blur-3xl" />
-              <div className="absolute -bottom-24 -left-24 w-72 h-72 bg-emerald-500/15 rounded-full blur-3xl" />
+            {/* Main Container with refined border and subtle gradient background */}
+            <div className="relative overflow-hidden rounded-3xl border border-slate-700/50 bg-[#0F172A]/80 backdrop-blur-md shadow-2xl">
               
-              <div className="relative z-10 grid gap-12 lg:grid-cols-2 lg:items-center">
-                <div>
-                  <h3 className="text-3xl font-bold text-white mb-4">Ready to plug this into your product?</h3>
-                  <p className="text-slate-200 mb-6">
-                    Spin up the live demo, skim the API docs, or drop me a note. I respond within a day with a path to production.
+              {/* Dynamic Background Glows */}
+              <div className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/3 w-[600px] h-[600px] bg-sky-500/20 rounded-full blur-[120px] opacity-40" />
+              <div className="absolute bottom-0 left-0 translate-y-1/3 -translate-x-1/3 w-[600px] h-[600px] bg-emerald-500/10 rounded-full blur-[120px] opacity-40" />
+              
+              {/* Noise Texture Overlay */}
+              <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-10 mix-blend-overlay" />
+
+              <div className="relative z-10 grid gap-12 lg:grid-cols-12 lg:items-center px-8 py-16 md:px-12">
+                
+                {/* LEFT COLUMN: Value Prop */}
+                <div className="lg:col-span-7 space-y-8">
+                  <div className="inline-flex items-center rounded-full border border-sky-500/30 bg-sky-500/10 px-3 py-1 text-xs font-medium text-sky-300 uppercase tracking-wider">
+                    <span className="relative flex h-2 w-2 mr-2">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-sky-400 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-sky-500"></span>
+                    </span>
+                    Available for hire
+                  </div>
+                  
+                  <h3 className="text-4xl font-bold text-white tracking-tight md:text-5xl">
+                    Stop building infra. <br/>
+                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-emerald-400">
+                      Start building product.
+                    </span>
+                  </h3>
+                  
+                  <p className="text-lg text-slate-300 max-w-xl leading-relaxed">
+                    Spin up the demo to feel the speed, clone the repo to inspect the quality, 
+                    or reach out if you need a scalable real-time system built for you.
                   </p>
                   
                   <div className="flex flex-col sm:flex-row gap-4">
-                    <Button asChild size="lg" className="bg-white text-black hover:bg-slate-200">
-                      <a href={URLS.register} className="flex items-center justify-center w-full">
-                        <Zap className="w-4 h-4 mr-2" /> Launch the demo
+                    <Button asChild size="lg" className="bg-white text-slate-950 hover:bg-sky-50 font-semibold h-12 px-8">
+                      <a href={URLS.register} className="flex items-center">
+                        <Zap className="w-5 h-5 mr-2 text-sky-600" /> 
+                        Launch Live Demo
                       </a>
                     </Button>
-                    <Button asChild size="lg" variant="outline" className="border-slate-700 bg-slate-900/50 text-white hover:bg-slate-800">
-                      <a href={URLS.repo} target="_blank" rel="noreferrer" className="flex items-center gap-2">
-                        <GithubIcon className="w-4 h-4" /> View the code
+                    <Button asChild size="lg" variant="outline" className="border-slate-600 text-slate-200 hover:bg-slate-800 hover:text-white h-12 px-8">
+                      <a href={URLS.repo} target="_blank" rel="noreferrer" className="flex items-center">
+                        <GithubIcon className="w-5 h-5 mr-2" /> 
+                        View Source
                       </a>
                     </Button>
                   </div>
                 </div>
-                
-                <div className="rounded-xl bg-black/40 p-6 border border-white/10">
-                  <p className="text-sm text-slate-300 mb-4">Prefer a human intro? Reach out directly.</p>
-                  <div className="flex flex-col sm:flex-row gap-3 mb-4">
+
+                {/* RIGHT COLUMN: Contact & Terminal */}
+                <div className="lg:col-span-5 space-y-6">
+                  
+                  {/* Quick Clone Terminal */}
+                  <div className="rounded-xl border border-slate-700 bg-black/40 p-4 backdrop-blur shadow-inner">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="text-xs text-slate-500 font-mono">Quick Start</div>
+                      <div className="flex space-x-1.5">
+                        <div className="w-2.5 h-2.5 rounded-full bg-red-500/20" />
+                        <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/20" />
+                        <div className="w-2.5 h-2.5 rounded-full bg-green-500/20" />
+                      </div>
+                    </div>
+                    <div className="group flex items-center justify-between rounded-lg bg-slate-900/80 p-3 font-mono text-sm text-sky-300 border border-slate-800/50">
+                      <span>git clone <span className="text-slate-400">.../chatterstack.git</span></span>
+                      <Copy 
+                        className="w-4 h-4 text-slate-500 cursor-pointer hover:text-white transition-colors" 
+                        onClick={() => navigator.clipboard.writeText("git clone https://github.com/Amaankaa/chatterstack-frontend.git")}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Connect Grid */}
+                  <div className="grid grid-cols-2 gap-3">
                     <a 
                       href="https://t.me/Amunishan" 
                       target="_blank" 
                       rel="noreferrer"
-                      className="flex-1 flex items-center justify-center px-4 py-3 rounded-lg bg-[#229ED9]/15 border border-[#229ED9]/40 text-[#229ED9] hover:bg-[#229ED9]/25 transition-colors"
+                      className="flex items-center justify-center gap-3 p-4 rounded-xl border border-[#229ED9]/20 bg-[#229ED9]/10 text-[#229ED9] hover:bg-[#229ED9]/20 hover:border-[#229ED9]/40 transition-all group"
                     >
-                      <Send className="w-4 h-4 mr-2" /> Telegram
+                      <Send className="w-5 h-5 group-hover:-translate-y-0.5 transition-transform" />
+                      <span className="font-medium">Telegram</span>
                     </a>
+                    
                     <a 
                       href="https://wa.me/251939163487" 
                       target="_blank" 
                       rel="noreferrer"
-                      className="flex-1 flex items-center justify-center px-4 py-3 rounded-lg bg-[#25D366]/15 border border-[#25D366]/40 text-[#25D366] hover:bg-[#25D366]/25 transition-colors"
+                      className="flex items-center justify-center gap-3 p-4 rounded-xl border border-[#25D366]/20 bg-[#25D366]/10 text-[#25D366] hover:bg-[#25D366]/20 hover:border-[#25D366]/40 transition-all group"
                     >
-                      <MessageCircle className="w-4 h-4 mr-2" /> WhatsApp
+                      <MessageCircle className="w-5 h-5 group-hover:-translate-y-0.5 transition-transform" />
+                      <span className="font-medium">WhatsApp</span>
+                    </a>
+
+                    <a 
+                      href="mailto:amanuel.merara@gmail.com" 
+                      className="col-span-2 flex items-center justify-between p-4 rounded-xl border border-slate-700 bg-slate-800/30 text-slate-300 hover:bg-slate-800/60 hover:border-slate-600 transition-all group"
+                    >
+                      <span className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-lg bg-slate-700 flex items-center justify-center">
+                          <ArrowRight className="w-4 h-4" />
+                        </div>
+                        <span className="font-medium group-hover:text-white">Email Me</span>
+                      </span>
+                      <span className="text-xs text-slate-500 font-mono">amanuel.merara@gmail.com</span>
                     </a>
                   </div>
-                  <div className="text-xs text-slate-500 flex items-center justify-between">
-                     <span>Response time: &lt; 24h</span>
-                     <a href="mailto:contact@amanuel.dev" className="text-sky-400 hover:underline">Email</a>
-                  </div>
+
                 </div>
               </div>
             </div>
