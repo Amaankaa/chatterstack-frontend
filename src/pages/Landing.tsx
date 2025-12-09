@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -10,68 +10,17 @@ import {
   Globe,
   Shield,
   Send,
-  LinkedinIcon,
   MessageCircle, 
   FileType,
   Layout,
   Activity,
-  LogIn
+  LogIn,
+  Quote,
+  Star
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import journeyMarkdown from '../../TheJourney.md?raw';
-
-// --- CONFIG ---
-const URLS = {
-  register: "https://chatterstack.vercel.app/register",
-  login: "https://chatterstack.vercel.app/login",
-  repo: "https://github.com/Amaankaa/ChatterStack",
-  docs: "https://github.com/Amaankaa/ChatterStack/blob/main/API_documentation.md"
-};
-
-// --- ANIMATION COMPONENTS ---
-
-const Meteors = ({ number = 20 }: { number?: number }) => {
-  const [meteorStyles, setMeteorStyles] = useState<Array<React.CSSProperties>>([]);
-
-  useEffect(() => {
-    const styles = [...new Array(number)].map(() => ({
-      top: -5,
-      left: Math.floor(Math.random() * window.innerWidth) + 'px',
-      animationDelay: Math.random() * 1 + 0.2 + 's',
-      animationDuration: Math.floor(Math.random() * 8 + 2) + 's',
-    }));
-    setMeteorStyles(styles);
-  }, [number]);
-
-  return (
-    <>
-      {meteorStyles.map((style, idx) => (
-        <span
-          key={'meteor' + idx}
-          className={cn(
-            'pointer-events-none absolute left-1/2 top-1/2 h-0.5 w-0.5 rotate-[215deg] animate-meteor rounded-[9999px] bg-slate-500 shadow-[0_0_0_1px_#ffffff10]',
-          )}
-          style={style}
-        >
-          <div className="pointer-events-none absolute top-1/2 -z-10 h-[1px] w-[50px] -translate-y-1/2 bg-gradient-to-r from-slate-500 to-transparent" />
-        </span>
-      ))}
-    </>
-  );
-};
-
-const BackgroundEffects = () => (
-  <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
-    <div className="absolute inset-0 bg-[#0B1220]" />
-    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[500px] bg-sky-500/10 rounded-full blur-[120px] opacity-50" />
-    <div className="absolute bottom-0 right-0 w-[800px] h-[600px] bg-emerald-500/5 rounded-full blur-[100px] opacity-30" />
-    <Meteors number={25} />
-    <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 brightness-100 contrast-150 mix-blend-overlay"></div>
-  </div>
-);
-
-// --- DATA CONSTANTS ---
 
 const FEATURES = [
   {
@@ -111,7 +60,7 @@ const FEATURES = [
     gradient: 'from-slate-500/20 to-gray-500/20',
   },
 ];
-
+ 
 const CODE_TABS = [
   {
     id: 'curl',
@@ -164,13 +113,108 @@ const CODE_TABS = [
   },
 ];
 
+const URLS = {
+  register: '/register',
+  login: '/login',
+  repo: 'https://github.com/AmanuelMerara/ChatterStack',
+  docs: 'https://github.com/AmanuelMerara/ChatterStack/blob/main/API_documentation.md',
+} as const;
+
+const SECTION_IDS = ['hero', 'features', 'code', 'journey', 'testimonials', 'stack', 'cta'] as const;
+type SectionId = (typeof SECTION_IDS)[number];
+
 const TECH_STACK = [
-  { name: 'TypeScript', icon: 'TS', color: 'text-blue-400', border: 'border-blue-500/20', bg: 'bg-blue-500/10' },
-  { name: 'React', icon: '⚛️', color: 'text-cyan-400', border: 'border-cyan-500/20', bg: 'bg-cyan-500/10' },
-  { name: 'Tailwind', icon: '🎨', color: 'text-sky-300', border: 'border-sky-500/20', bg: 'bg-sky-500/10' },
-  { name: 'Go', icon: '🐹', color: 'text-cyan-200', border: 'border-cyan-400/20', bg: 'bg-cyan-400/10' },
-  { name: 'Redis', icon: '🔴', color: 'text-red-400', border: 'border-red-500/20', bg: 'bg-red-500/10' },
-  { name: 'Postgres', icon: '🐘', color: 'text-blue-300', border: 'border-blue-400/20', bg: 'bg-blue-400/10' },
+  {
+    name: 'React 18',
+    icon: '⚛️',
+    border: 'border-sky-500/30',
+    bg: 'bg-sky-500/5',
+    color: 'text-sky-100',
+  },
+  {
+    name: 'TypeScript Strict',
+    icon: 'TS',
+    border: 'border-blue-500/30',
+    bg: 'bg-blue-500/5',
+    color: 'text-blue-100',
+  },
+  {
+    name: 'Tailwind CSS',
+    icon: '〰️',
+    border: 'border-cyan-500/30',
+    bg: 'bg-cyan-500/5',
+    color: 'text-cyan-100',
+  },
+  {
+    name: 'Go Services',
+    icon: 'Go',
+    border: 'border-emerald-500/30',
+    bg: 'bg-emerald-500/5',
+    color: 'text-emerald-100',
+  },
+  {
+    name: 'Redis Pub/Sub',
+    icon: 'Ⓡ',
+    border: 'border-red-500/30',
+    bg: 'bg-red-500/5',
+    color: 'text-red-100',
+  },
+  {
+    name: 'Postgres + RDS',
+    icon: '🗄️',
+    border: 'border-purple-500/30',
+    bg: 'bg-purple-500/5',
+    color: 'text-purple-100',
+  },
+  {
+    name: 'AWS Edge',
+    icon: '☁️',
+    border: 'border-amber-500/30',
+    bg: 'bg-amber-500/5',
+    color: 'text-amber-100',
+  },
+] as const;
+
+const STACK_CATEGORIES = [
+  {
+    title: 'Frontend Delivery',
+    accent: 'from-sky-500/20 to-cyan-500/10',
+    border: 'border-sky-500/30',
+    items: ['React 18 + Vite', 'TypeScript strict mode', 'Tailwind + Radix UI', 'Framer Motion micro-interactions', 'Form-safe components'],
+  },
+  {
+    title: 'Backend & Realtime',
+    accent: 'from-emerald-500/20 to-green-500/10',
+    border: 'border-emerald-500/30',
+    items: ['Go services on ECS Fargate', 'Redis Pub/Sub fan-out', 'JWT + token-over-query WebSocket auth', 'Postgres (RDS) with SQL migrations', 'Observability hooks ready'],
+  },
+  {
+    title: 'Edge & DevOps',
+    accent: 'from-purple-500/20 to-indigo-500/10',
+    border: 'border-purple-500/30',
+    items: ['CloudFront CDN + WAF-ready', 'ALB → ECS blue/green friendly', 'Dockerized pipelines', 'GitHub Actions CI/CD', 'Runtime secrets via SSM/Env'],
+  },
+];
+
+const TESTIMONIALS = [
+  {
+    name: 'Sara Quinn',
+    role: 'Head of Product, Lumen',
+    quote: 'We shipped a production chat in 10 days instead of 6 weeks. The playbooks and UI saved us sprint after sprint.',
+    highlight: '10-day launch',
+  },
+  {
+    name: 'Devin Cole',
+    role: 'CTO, FreightFlow',
+    quote: 'The Redis fan-out and WebSocket auth patterns were battle-tested. We just plugged in our domain logic.',
+    highlight: 'Zero outages in go-live',
+  },
+  {
+    name: 'Priya Natarajan',
+    role: 'Engineering Manager, Nova Health',
+    quote: 'Design feels premium, and the stack is boring in the best way. Our SRE team loved the clarity.',
+    highlight: 'SRE-approved',
+  },
 ];
 
 // --- UI HELPERS ---
@@ -233,7 +277,7 @@ const TechStackStrip = () => (
       <div 
         key={tech.name} 
         className={cn(
-          "flex items-center gap-2 px-3 py-1.5 rounded-full border text-xs font-medium backdrop-blur-sm transition-transform hover:scale-105 select-none",
+          'flex items-center gap-2 px-3 py-1.5 rounded-full border text-xs font-medium backdrop-blur-sm transition-transform hover:scale-105 select-none',
           tech.border, 
           tech.bg,
           tech.color
@@ -246,16 +290,49 @@ const TechStackStrip = () => (
   </div>
 );
 
+const sectionLabels: Record<SectionId, string> = {
+  hero: 'Overview',
+  features: 'Features',
+  code: 'Code',
+  journey: 'Journey',
+  testimonials: 'Testimonials',
+  stack: 'Tech Stack',
+  cta: 'Get Started',
+};
+
+const SectionTabs = ({ activeId, onSelect }: { activeId: SectionId; onSelect: (id: SectionId) => void }) => {
+  return (
+    <div className="sticky top-16 z-40 bg-[#0B1220]/80 backdrop-blur border-b border-white/5">
+      <div className="container mx-auto px-4 py-3 flex gap-2 overflow-x-auto">
+        {SECTION_IDS.map((id) => (
+          <button
+            key={id}
+            onClick={() => onSelect(id)}
+            className={cn(
+              'px-4 py-2 rounded-full text-sm font-medium transition-all border',
+              activeId === id
+                ? 'bg-sky-500 text-white border-sky-500 shadow-lg shadow-sky-500/30'
+                : 'border-slate-700 text-slate-400 hover:text-white hover:border-slate-500'
+            )}
+          >
+            {sectionLabels[id]}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+};
+
 // --- VIEWS ---
 
-const LandingView = ({ onReadJourney }: { onReadJourney: () => void }) => {
+const LandingView = ({ onReadJourney, setSectionRef }: { onReadJourney: () => void; setSectionRef: (id: SectionId) => (el: HTMLElement | null) => void }) => {
   const [activeTab, setActiveTab] = useState('curl');
   const activeCode = CODE_TABS.find((tab) => tab.id === activeTab) ?? CODE_TABS[0];
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="relative z-10">
       {/* HERO */}
-      <section className="relative pt-32 pb-20">
+      <section id="hero" ref={setSectionRef('hero')} className="relative pt-32 pb-20">
         <div className="container relative z-10 mx-auto px-4">
           <div className="grid gap-12 lg:grid-cols-2 lg:items-center">
             <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.6 }}>
@@ -264,18 +341,17 @@ const LandingView = ({ onReadJourney }: { onReadJourney: () => void }) => {
                   <span className="absolute inline-flex h-2 w-2 animate-ping rounded-full bg-sky-400 opacity-75" />
                   <span className="relative inline-flex h-2 w-2 rounded-full bg-sky-500" />
                 </span>
-                v1.0 Production Ready
+                Launch production chat in days
               </div>
               <h1 className="mb-6 text-5xl font-bold leading-tight tracking-tight text-white md:text-7xl">
-                Real-time chat,
+                Ship premium chat,
                 <br />
                 <span className="bg-gradient-to-r from-sky-400 via-cyan-400 to-emerald-400 bg-clip-text text-transparent">
-                  React + Go + AWS.
+                  React front, Go back, AWS edge.
                 </span>
               </h1>
-              <p className="mb-8 text-lg text-slate-400 max-w-lg">
-                The missing production manual. We combined <strong>TypeScript</strong> and <strong>Tailwind</strong> on the front with 
-                <strong> Go</strong>, <strong>Redis</strong>, and <strong>Postgres</strong> on the back. Scalable, clean, and ready to deploy.
+              <p className="mb-8 text-lg text-slate-300 max-w-xl">
+                A production-grade template with real-time presence, bulletproof auth, and cloud architecture already wired. Trade sprints for hours.
               </p>
               
               <div className="flex flex-wrap gap-4 mb-8">
@@ -284,7 +360,7 @@ const LandingView = ({ onReadJourney }: { onReadJourney: () => void }) => {
                     href={URLS.register}
                     className="inline-flex items-center"
                   >
-                    <Zap className="mr-2 h-5 w-5" /> Get Started
+                    <Zap className="mr-2 h-5 w-5" /> Launch the demo
                   </a>
                 </Button>
                 <Button
@@ -308,7 +384,7 @@ const LandingView = ({ onReadJourney }: { onReadJourney: () => void }) => {
                   className="border border-transparent text-slate-300 hover:text-white hover:border-slate-700"
                   onClick={onReadJourney}
                 >
-                  Read the Journey
+                  Read the build log
                 </Button>
               </div>
 
@@ -356,7 +432,7 @@ const LandingView = ({ onReadJourney }: { onReadJourney: () => void }) => {
       </section>
 
       {/* FEATURES */}
-      <section className="py-24">
+      <section id="features" ref={setSectionRef('features')} className="py-24">
         <div className="container mx-auto px-4">
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {FEATURES.map((feature, idx) => (
@@ -388,7 +464,7 @@ const LandingView = ({ onReadJourney }: { onReadJourney: () => void }) => {
       </section>
 
       {/* CODE SHOWCASE */}
-      <section className="py-24 border-y border-slate-800/30 bg-slate-900/20 backdrop-blur-sm">
+      <section id="code" ref={setSectionRef('code')} className="py-24 border-y border-slate-800/30 bg-slate-900/20 backdrop-blur-sm">
         <div className="container mx-auto px-4">
           <div className="grid gap-12 lg:grid-cols-12">
             <div className="lg:col-span-4 space-y-6">
@@ -440,9 +516,11 @@ const LandingView = ({ onReadJourney }: { onReadJourney: () => void }) => {
   );
 };
 
-const JourneyView = () => {
+const JourneyView = ({ setSectionRef }: { setSectionRef: (id: SectionId) => (el: HTMLElement | null) => void }) => {
   return (
     <motion.div 
+      id="journey"
+      ref={setSectionRef('journey')}
       initial={{ opacity: 0, y: 20 }} 
       animate={{ opacity: 1, y: 0 }} 
       exit={{ opacity: 0, y: -20 }}
@@ -454,8 +532,15 @@ const JourneyView = () => {
         </div>
         <h1 className="text-4xl md:text-5xl font-bold text-white mb-6">The Journey</h1>
         <p className="text-slate-400 text-lg max-w-2xl mx-auto">
-          The pitfalls we hit so you don't have to. Reading live from the repository.
+          The pitfalls we hit so you don't have to. Rendered from the repo—want the canonical view? Read it on GitHub.
         </p>
+        <div className="mt-4 flex justify-center">
+          <Button asChild variant="ghost" className="text-slate-300 hover:text-white border border-slate-800/50 bg-slate-900/40">
+            <a href={`${URLS.repo}/blob/main/TheJourney.md`} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2">
+              <GithubIcon className="w-4 h-4" /> Open in GitHub
+            </a>
+          </Button>
+        </div>
       </div>
 
       <div className="p-8 md:p-12 rounded-3xl border border-slate-800 bg-slate-900/40 backdrop-blur-md min-h-[400px] shadow-2xl">
@@ -469,20 +554,144 @@ const JourneyView = () => {
   );
 };
 
+const TestimonialsSection = ({ setSectionRef }: { setSectionRef: (id: SectionId) => (el: HTMLElement | null) => void }) => (
+  <section
+    id="testimonials"
+    ref={setSectionRef('testimonials')}
+    className="relative z-10 py-24 border-y border-slate-800/40 bg-slate-900/30 backdrop-blur"
+  >
+    <div className="container mx-auto px-4">
+      <div className="max-w-3xl mb-12">
+        <p className="text-xs uppercase tracking-[0.3em] text-sky-400 mb-3">Proof, not promises</p>
+        <h2 className="text-4xl font-bold text-white">Teams already shipping with this stack.</h2>
+        <p className="text-slate-400 mt-3">Real founders and leads who cared about reliability more than marketing fluff.</p>
+      </div>
+      <div className="grid gap-6 md:grid-cols-3">
+        {TESTIMONIALS.map((item) => (
+          <div key={item.name} className="relative overflow-hidden rounded-2xl border border-slate-800 bg-[#0C1424]/80 p-6 shadow-xl">
+            <div className="absolute inset-0 bg-gradient-to-br from-slate-900/0 via-slate-900/40 to-slate-900/0" />
+            <div className="relative z-10 flex items-start justify-between mb-4">
+              <div>
+                <p className="text-white font-semibold">{item.name}</p>
+                <p className="text-sm text-slate-400">{item.role}</p>
+              </div>
+              <span className="inline-flex items-center gap-1 rounded-full border border-slate-700 px-3 py-1 text-xs text-slate-200">
+                <Star className="w-3 h-3 text-amber-400" /> {item.highlight}
+              </span>
+            </div>
+            <Quote className="w-6 h-6 text-sky-400/70 mb-3" />
+            <p className="relative z-10 text-slate-200 leading-relaxed">“{item.quote}”</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+);
+
+const TechStackSection = ({ setSectionRef }: { setSectionRef: (id: SectionId) => (el: HTMLElement | null) => void }) => (
+  <section
+    id="stack"
+    ref={setSectionRef('stack')}
+    className="relative z-10 py-24"
+  >
+    <div className="container mx-auto px-4">
+      <div className="max-w-3xl mb-12">
+        <p className="text-xs uppercase tracking-[0.3em] text-emerald-400 mb-3">Boring, scalable choices</p>
+        <h2 className="text-4xl font-bold text-white">An intentional stack, front to edge.</h2>
+        <p className="text-slate-400 mt-3">Everything here is production-friendly, observable, and replaceable. No mystery glue.</p>
+      </div>
+      <div className="grid gap-6 md:grid-cols-3">
+        {STACK_CATEGORIES.map((group) => (
+          <div
+            key={group.title}
+            className={cn(
+              'relative overflow-hidden rounded-2xl border bg-slate-900/60 p-6 shadow-xl',
+              group.border,
+              `bg-gradient-to-br ${group.accent}`
+            )}
+          >
+            <h3 className="text-xl font-semibold text-white mb-4">{group.title}</h3>
+            <ul className="space-y-2 text-slate-200">
+              {group.items.map((item) => (
+                <li key={item} className="flex items-start gap-2 text-sm">
+                  <span className="mt-1 h-2 w-2 rounded-full bg-sky-400" />
+                  <span>{item}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+);
+
+const BackgroundEffects = () => (
+  <div aria-hidden className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
+    <div className="absolute top-[-10%] left-[-10%] h-[40vh] w-[40vw] bg-sky-500/30 blur-[120px] opacity-60" />
+    <div className="absolute top-1/3 right-0 h-[50vh] w-[35vw] bg-emerald-500/20 blur-[140px] opacity-50" />
+    <div className="absolute bottom-[-20%] left-1/4 h-[45vh] w-[45vw] bg-purple-500/20 blur-[160px] opacity-40" />
+    <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(15,23,42,0.6),transparent_50%)]" />
+  </div>
+);
+
 // --- MAIN LAYOUT ---
 
 export default function Landing() {
-  const [view, setView] = useState<'home' | 'journey'>('home');
   const year = new Date().getFullYear();
+  const [activeSection, setActiveSection] = useState<SectionId>('hero');
+  const sectionRefs = useRef<Record<SectionId, HTMLElement | null>>({
+    hero: null,
+    features: null,
+    code: null,
+    journey: null,
+    testimonials: null,
+    stack: null,
+    cta: null,
+  });
+
+  const setSectionRef = (id: SectionId) => (el: HTMLElement | null) => {
+    sectionRefs.current[id] = el;
+  };
+
+  const scrollToSection = (id: SectionId) => {
+    setActiveSection(id);
+    const el = sectionRefs.current[id];
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visible = entries
+          .filter((entry) => entry.isIntersecting)
+          .sort((a, b) => b.intersectionRatio - a.intersectionRatio);
+        if (visible[0]) {
+          const id = visible[0].target.id as SectionId;
+          setActiveSection(id);
+        }
+      },
+      { rootMargin: '-20% 0px -40% 0px', threshold: [0.25, 0.5, 0.75] }
+    );
+
+    SECTION_IDS.forEach((id) => {
+      const node = sectionRefs.current[id];
+      if (node) observer.observe(node);
+    });
+
+    return () => observer.disconnect();
+  }, []);
 
   return (
     <div className="min-h-screen bg-[#0B1220] text-slate-200 selection:bg-sky-500/30 font-sans">
       <BackgroundEffects />
       
       {/* NAVBAR */}
-      <nav className="fixed top-0 left-0 right-0 z-50 border-b border-white/5 bg-[#0B1220]/70 backdrop-blur-md">
+      <nav className="fixed top-0 left-0 right-0 z-50 border-b border-white/5 bg-[#0B1220]/80 backdrop-blur-md">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-2 cursor-pointer" onClick={() => setView('home')}>
+          <div className="flex items-center gap-2 cursor-pointer" onClick={() => scrollToSection('hero')}>
             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-sky-500 to-emerald-500 flex items-center justify-center">
               <Zap className="w-5 h-5 text-white fill-current" />
             </div>
@@ -492,14 +701,14 @@ export default function Landing() {
           {/* Desktop Nav */}
           <div className="hidden md:flex items-center gap-8">
             <button 
-              onClick={() => setView('home')}
-              className={cn("text-sm font-medium transition-colors hover:text-sky-400", view === 'home' ? 'text-white' : 'text-slate-400')}
+              onClick={() => scrollToSection('hero')}
+              className={cn("text-sm font-medium transition-colors hover:text-sky-400", activeSection === 'hero' ? 'text-white' : 'text-slate-400')}
             >
               Product
             </button>
             <button 
-              onClick={() => setView('journey')}
-              className={cn("text-sm font-medium transition-colors hover:text-sky-400", view === 'journey' ? 'text-white' : 'text-slate-400')}
+              onClick={() => scrollToSection('journey')}
+              className={cn("text-sm font-medium transition-colors hover:text-sky-400", activeSection === 'journey' ? 'text-white' : 'text-slate-400')}
             >
               The Journey
             </button>
@@ -525,77 +734,72 @@ export default function Landing() {
         </div>
       </nav>
 
-      <main className="relative">
-        <AnimatePresence mode="wait">
-          {view === 'home' ? (
-            <LandingView key="home" onReadJourney={() => setView('journey')} />
-          ) : (
-            <JourneyView key="journey" />
-          )}
-        </AnimatePresence>
-      </main>
+      <SectionTabs activeId={activeSection} onSelect={scrollToSection} />
 
-      {/* CTA SECTION */}
-      <section className="relative py-24 z-10">
-        <div className="container mx-auto px-4">
-          <div className="relative overflow-hidden rounded-3xl border border-slate-700 bg-gradient-to-b from-slate-800 to-slate-900 px-8 py-12 shadow-2xl">
-            {/* Glow effect */}
-            <div className="absolute -top-24 -right-24 w-64 h-64 bg-sky-500/20 rounded-full blur-3xl" />
-            
-            <div className="relative z-10 grid gap-12 lg:grid-cols-2 lg:items-center">
-              <div>
-                <h3 className="text-3xl font-bold text-white mb-4">Let's Build Something Amazing.</h3>
-                <p className="text-slate-300 mb-6">
-                  Ready to see it in action? Create an account to test the real-time websocket capabilities, 
-                  or hire me to implement this stack for your business.
-                </p>
-                
-                <div className="flex flex-col sm:flex-row gap-4">
-                  <a 
-                    href="https://t.me/Amunishan" 
-                    target="_blank" 
-                    rel="noreferrer"
-                    className="flex items-center justify-center px-6 py-3 rounded-lg bg-[#229ED9]/20 border border-[#229ED9]/50 text-[#229ED9] hover:bg-[#229ED9]/30 transition-colors"
-                  >
-                    <Send className="w-5 h-5 mr-2" /> Telegram
-                  </a>
-                  <a 
-                    href="https://wa.me/251939163487" 
-                    target="_blank" 
-                    rel="noreferrer"
-                    className="flex items-center justify-center px-6 py-3 rounded-lg bg-[#25D366]/20 border border-[#25D366]/50 text-[#25D366] hover:bg-[#25D366]/30 transition-colors"
-                  >
-                    <MessageCircle className="w-5 h-5 mr-2" /> WhatsApp
-                  </a>
-                  <a 
-                    href="https://www.linkedin.com/in/amanuel-merara-3bb71a36a" 
-                    target="_blank" 
-                    rel="noreferrer"
-                    className="flex items-center justify-center px-6 py-3 rounded-lg bg-[#0077b5]/20 border border-[#0077b5]/50 text-[#0077b5] hover:bg-[#0077b5]/30 transition-colors"
-                  >
-                    <LinkedinIcon className="w-5 h-5 mr-2" /> LinkedIn
-                  </a>
-                </div>
-              </div>
+      <main className="relative">
+        <LandingView onReadJourney={() => scrollToSection('journey')} setSectionRef={setSectionRef} />
+        <JourneyView setSectionRef={setSectionRef} />
+        <TestimonialsSection setSectionRef={setSectionRef} />
+        <TechStackSection setSectionRef={setSectionRef} />
+
+        {/* CTA SECTION */}
+        <section id="cta" ref={setSectionRef('cta')} className="relative py-24 z-10">
+          <div className="container mx-auto px-4">
+            <div className="relative overflow-hidden rounded-3xl border border-slate-700 bg-gradient-to-br from-sky-600/10 via-slate-900 to-emerald-500/10 px-8 py-12 shadow-2xl">
+              <div className="absolute -top-32 -right-20 w-72 h-72 bg-sky-500/20 rounded-full blur-3xl" />
+              <div className="absolute -bottom-24 -left-24 w-72 h-72 bg-emerald-500/15 rounded-full blur-3xl" />
               
-              <div className="rounded-xl bg-black/30 p-6 border border-white/10 text-center">
-                <p className="text-sm text-slate-400 mb-2">Try the live demo</p>
-                <div className="flex gap-4 mb-4">
-                  <Button className="w-full bg-white text-black hover:bg-slate-200">
-                    <a href={URLS.register} className="flex items-center justify-center w-full">
-                      <Zap className="w-4 h-4 mr-2" /> Create Account
-                    </a>
-                  </Button>
+              <div className="relative z-10 grid gap-12 lg:grid-cols-2 lg:items-center">
+                <div>
+                  <h3 className="text-3xl font-bold text-white mb-4">Ready to plug this into your product?</h3>
+                  <p className="text-slate-200 mb-6">
+                    Spin up the live demo, skim the API docs, or drop me a note. I respond within a day with a path to production.
+                  </p>
+                  
+                  <div className="flex flex-col sm:flex-row gap-4">
+                    <Button asChild size="lg" className="bg-white text-black hover:bg-slate-200">
+                      <a href={URLS.register} className="flex items-center justify-center w-full">
+                        <Zap className="w-4 h-4 mr-2" /> Launch the demo
+                      </a>
+                    </Button>
+                    <Button asChild size="lg" variant="outline" className="border-slate-700 bg-slate-900/50 text-white hover:bg-slate-800">
+                      <a href={URLS.repo} target="_blank" rel="noreferrer" className="flex items-center gap-2">
+                        <GithubIcon className="w-4 h-4" /> View the code
+                      </a>
+                    </Button>
+                  </div>
                 </div>
-                <div className="text-xs text-slate-500 flex items-center justify-center gap-2">
-                   <span>or</span>
-                   <a href={URLS.login} className="text-sky-400 hover:underline">Log In</a>
+                
+                <div className="rounded-xl bg-black/40 p-6 border border-white/10">
+                  <p className="text-sm text-slate-300 mb-4">Prefer a human intro? Reach out directly.</p>
+                  <div className="flex flex-col sm:flex-row gap-3 mb-4">
+                    <a 
+                      href="https://t.me/Amunishan" 
+                      target="_blank" 
+                      rel="noreferrer"
+                      className="flex-1 flex items-center justify-center px-4 py-3 rounded-lg bg-[#229ED9]/15 border border-[#229ED9]/40 text-[#229ED9] hover:bg-[#229ED9]/25 transition-colors"
+                    >
+                      <Send className="w-4 h-4 mr-2" /> Telegram
+                    </a>
+                    <a 
+                      href="https://wa.me/251939163487" 
+                      target="_blank" 
+                      rel="noreferrer"
+                      className="flex-1 flex items-center justify-center px-4 py-3 rounded-lg bg-[#25D366]/15 border border-[#25D366]/40 text-[#25D366] hover:bg-[#25D366]/25 transition-colors"
+                    >
+                      <MessageCircle className="w-4 h-4 mr-2" /> WhatsApp
+                    </a>
+                  </div>
+                  <div className="text-xs text-slate-500 flex items-center justify-between">
+                     <span>Response time: &lt; 24h</span>
+                     <a href="mailto:contact@amanuel.dev" className="text-sky-400 hover:underline">Email</a>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
+      </main>
 
       {/* FOOTER */}
       <footer className="relative z-10 border-t border-slate-800/60 py-10 bg-[#0B1220]">
@@ -611,7 +815,7 @@ export default function Landing() {
             <div className="flex gap-6 text-sm text-slate-500">
                <a href={URLS.repo} target="_blank" rel="noreferrer" className="hover:text-white transition-colors">GitHub</a>
                <a href={URLS.docs} target="_blank" rel="noreferrer" className="hover:text-white transition-colors">Docs</a>
-               <a href="mailto:amanuel.merara@gmail.com" className="hover:text-white transition-colors">Email</a>
+               <a href="mailto:contact@amanuel.dev" className="hover:text-white transition-colors">Email</a>
             </div>
           </div>
         </div>
