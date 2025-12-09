@@ -117,7 +117,7 @@ const URLS = {
   docs: 'https://github.com/AmanuelMerara/ChatterStack/blob/main/API_documentation.md',
 } as const;
 
-const SECTION_IDS = ['hero', 'features', 'code', 'journey', 'testimonials', 'stack', 'cta'] as const;
+const SECTION_IDS = ['hero', 'features', 'code', 'testimonials', 'stack', 'cta'] as const;
 type SectionId = (typeof SECTION_IDS)[number];
 
 const TECH_STACK = [
@@ -291,7 +291,6 @@ const sectionLabels: Record<SectionId, string> = {
   hero: 'Overview',
   features: 'Features',
   code: 'Code',
-  journey: 'Journey',
   testimonials: 'Testimonials',
   stack: 'Tech Stack',
   cta: 'Get Started',
@@ -322,7 +321,7 @@ const SectionTabs = ({ activeId, onSelect }: { activeId: SectionId; onSelect: (i
 
 // --- VIEWS ---
 
-const LandingView = ({ onReadJourney, setSectionRef }: { onReadJourney: () => void; setSectionRef: (id: SectionId) => (el: HTMLElement | null) => void }) => {
+export const LandingView = ({ setSectionRef }: { setSectionRef: (id: SectionId) => (el: HTMLElement | null) => void }) => {
   const [activeTab, setActiveTab] = useState('curl');
   const activeCode = CODE_TABS.find((tab) => tab.id === activeTab) ?? CODE_TABS[0];
 
@@ -379,7 +378,9 @@ const LandingView = ({ onReadJourney, setSectionRef }: { onReadJourney: () => vo
                   size="lg"
                   variant="ghost"
                   className="border border-transparent text-slate-300 hover:text-white hover:border-slate-700"
-                  onClick={onReadJourney}
+                  onClick={() =>
+                  window.open('https://github.com/AmanuelMerara/ChatterStack/blob/main/TheJourney.md', '_blank', 'noreferrer')
+                  }
                 >
                   Read the build log
                 </Button>
@@ -603,7 +604,6 @@ export default function Landing() {
     hero: null,
     features: null,
     code: null,
-    journey: null,
     testimonials: null,
     stack: null,
     cta: null,
@@ -665,12 +665,6 @@ export default function Landing() {
             >
               Product
             </button>
-            <button 
-              onClick={() => scrollToSection('journey')}
-              className={cn("text-sm font-medium transition-colors hover:text-sky-400", activeSection === 'journey' ? 'text-white' : 'text-slate-400')}
-            >
-              The Journey
-            </button>
             <a href={URLS.docs} target="_blank" rel="noreferrer" className="text-sm font-medium text-slate-400 hover:text-sky-400 transition-colors">
               Docs
             </a>
@@ -696,7 +690,6 @@ export default function Landing() {
       <SectionTabs activeId={activeSection} onSelect={scrollToSection} />
 
       <main className="relative">
-        <LandingView onReadJourney={() => scrollToSection('journey')} setSectionRef={setSectionRef} />
         <TestimonialsSection setSectionRef={setSectionRef} />
         <TechStackSection setSectionRef={setSectionRef} />
 
