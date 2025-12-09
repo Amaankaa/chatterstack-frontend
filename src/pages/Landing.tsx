@@ -321,7 +321,7 @@ const SectionTabs = ({ activeId, onSelect }: { activeId: SectionId; onSelect: (i
 
 // --- VIEWS ---
 
-export const LandingView = ({ setSectionRef }: { setSectionRef: (id: SectionId) => (el: HTMLElement | null) => void }) => {
+const LandingView = ({ onReadJourney, setSectionRef }: { onReadJourney: () => void; setSectionRef: (id: SectionId) => (el: HTMLElement | null) => void }) => {
   const [activeTab, setActiveTab] = useState('curl');
   const activeCode = CODE_TABS.find((tab) => tab.id === activeTab) ?? CODE_TABS[0];
 
@@ -378,9 +378,7 @@ export const LandingView = ({ setSectionRef }: { setSectionRef: (id: SectionId) 
                   size="lg"
                   variant="ghost"
                   className="border border-transparent text-slate-300 hover:text-white hover:border-slate-700"
-                  onClick={() =>
-                  window.open('https://github.com/AmanuelMerara/ChatterStack/blob/main/TheJourney.md', '_blank', 'noreferrer')
-                  }
+                  onClick={onReadJourney}
                 >
                   Read the build log
                 </Button>
