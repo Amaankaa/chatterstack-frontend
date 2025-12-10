@@ -1,8 +1,8 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuthStore } from '@/stores/authStore';
-import { register as registerUser, registerSchema, RegisterInput, login as loginUser, getUserByEmail } from '@/api/auth';
+import { register as registerUser } from '@/api/auth';
+import { z } from 'zod';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -10,44 +10,34 @@ import { useToast } from '@/hooks/use-toast';
 import AuthLayout from '@/components/layouts/AuthLayout';
 import { Loader2 } from 'lucide-react';
 
+// Local form schema (frontend-only) with confirmPassword
+const registerFormSchema = z.object({
+  username: z.string().min(3, 'Username must be at least 3 characters'),
+  email: z.string().email('Invalid email address'),
+  password: z.string().min(6, 'Password must be at least 6 characters'),
+  confirmPassword: z.string().min(6, 'Password must be at least 6 characters'),
+}).refine((vals) => vals.password === vals.confirmPassword, {
+  message: 'Passwords do not match',
+  path: ['confirmPassword'],
+});
+
+type RegisterFormInput = z.infer<typeof registerFormSchema>;
+
 export default function Register() {
   const navigate = useNavigate();
-  const { setAuth } = useAuthStore();
   const { toast } = useToast();
 
-  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<RegisterInput>({
-    resolver: zodResolver(registerSchema),
+  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<RegisterFormInput>({
+    resolver: zodResolver(registerFormSchema),
   });
 
-  const onSubmit = async (data: RegisterInput) => {
+  const onSubmit = async (data: RegisterFormInput) => {
     try {
-      // 1) Create the account
-      const regRes: any = await registerUser(data);
-
-      // 2) If backend already returns tokens and user, use them directly
-      if (regRes?.access_token && regRes?.refresh_token && regRes?.user) {
-        setAuth(regRes.user, regRes.access_token, regRes.refresh_token);
-        toast({ title: "Account created", description: "Welcome aboard!" });
-        navigate('/chat');
-        return;
-      }
-
-      // 3) Otherwise, immediately login with the same credentials
-      const loginRes = await loginUser({ email: data.email, password: data.password });
-
-      // 4) Use user if present, or fetch by email as a fallback
-      let user = loginRes.user ?? null;
-      if (!user) {
-        try {
-          user = await getUserByEmail(data.email);
-        } catch {
-          user = null;
-        }
-      }
-
-      setAuth(user, loginRes.access_token, loginRes.refresh_token);
-      toast({ title: "Account created", description: "You're all set — logged in!" });
-      navigate('/chat');
+      // Only send username/email/password to backend
+      const payload = { username: data.username, email: data.email, password: data.password };
+      await registerUser(payload);
+      toast({ title: 'Account created', description: 'You can now sign in.' });
+      navigate('/login');
     } catch (error: any) {
       toast({ 
         variant: "destructive",
@@ -77,6 +67,11 @@ export default function Register() {
           <Label htmlFor="password">Password</Label>
           <Input id="password" type="password" disabled={isSubmitting} {...register('password')} />
           {errors.password && <p className="text-xs text-red-500">{errors.password.message}</p>}
+        </div>
+        <div className="grid gap-2">
+          <Label htmlFor="confirmPassword">Confirm Password</Label>
+          <Input id="confirmPassword" type="password" disabled={isSubmitting} {...register('confirmPassword')} />
+          {errors.confirmPassword && <p className="text-xs text-red-500">{errors.confirmPassword.message}</p>}
         </div>
         <Button disabled={isSubmitting}>
           {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
