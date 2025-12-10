@@ -4,7 +4,7 @@ import { User } from '@/types';
 interface AuthState {
   user: User | null;
   token: string | null;
-  setAuth: (user: User, token: string, refreshToken: string) => void;
+  setAuth: (user: User | null, token: string, refreshToken: string) => void;
   logout: () => void;
 }
 

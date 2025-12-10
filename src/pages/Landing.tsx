@@ -115,8 +115,8 @@ const CODE_TABS = [
 const URLS = {
   register: '/register',
   login: '/login',
-  repo: 'https://github.com/AmanuelMerara/ChatterStack',
-  docs: 'https://github.com/AmanuelMerara/ChatterStack/blob/main/API_documentation.md',
+  repo: 'https://github.com/Amaankaa/ChatterStack',
+  docs: 'https://github.com/Amaankaa/ChatterStack/blob/main/API_documentation.md',
 } as const;
 
 const SECTION_IDS = ['hero', 'features', 'code', 'testimonials', 'stack', 'cta'] as const;

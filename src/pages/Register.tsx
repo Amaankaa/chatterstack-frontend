@@ -2,7 +2,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/stores/authStore';
-import { register as registerUser, registerSchema, RegisterInput } from '@/api/auth';
+import { register as registerUser, registerSchema, RegisterInput, login as loginUser, getUserByEmail } from '@/api/auth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -21,15 +21,38 @@ export default function Register() {
 
   const onSubmit = async (data: RegisterInput) => {
     try {
-      const res = await registerUser(data);
-      setAuth(res.user, res.access_token, res.refresh_token);
-      toast({ title: "Account created", description: "Welcome aboard!" });
-      navigate('/chat'); 
+      // 1) Create the account
+      const regRes: any = await registerUser(data);
+
+      // 2) If backend already returns tokens and user, use them directly
+      if (regRes?.access_token && regRes?.refresh_token && regRes?.user) {
+        setAuth(regRes.user, regRes.access_token, regRes.refresh_token);
+        toast({ title: "Account created", description: "Welcome aboard!" });
+        navigate('/chat');
+        return;
+      }
+
+      // 3) Otherwise, immediately login with the same credentials
+      const loginRes = await loginUser({ email: data.email, password: data.password });
+
+      // 4) Use user if present, or fetch by email as a fallback
+      let user = loginRes.user ?? null;
+      if (!user) {
+        try {
+          user = await getUserByEmail(data.email);
+        } catch {
+          user = null;
+        }
+      }
+
+      setAuth(user, loginRes.access_token, loginRes.refresh_token);
+      toast({ title: "Account created", description: "You're all set — logged in!" });
+      navigate('/chat');
     } catch (error: any) {
       toast({ 
         variant: "destructive",
         title: "Error", 
-        description: error.response?.data?.error || "Registration failed" 
+        description: error?.response?.data?.error || error?.message || "Registration failed" 
       });
     }
   };
