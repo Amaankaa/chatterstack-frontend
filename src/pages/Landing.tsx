@@ -116,7 +116,7 @@ const URLS = {
   register: '/register',
   login: '/login',
   repo: 'https://github.com/Amaankaa/ChatterStack',
-  docs: 'https://github.com/Amaankaa/ChatterStack/blob/main/API_documentation.md',
+  docs: 'https://github.com/Amaankaa/ChatterStack/blob/master/API_documentation.md',
 } as const;
 
 const SECTION_IDS = ['hero', 'features', 'code', 'testimonials', 'stack', 'cta'] as const;
@@ -382,7 +382,7 @@ const LandingView = ({ setSectionRef }: { setSectionRef: (id: SectionId) => (el:
                   variant="ghost"
                   className="border border-transparent text-slate-300 hover:text-white hover:border-slate-700"
                 >
-                  <a href={`${URLS.repo}/blob/main/TheJourney.md`} target="_blank" rel="noreferrer" className="inline-flex items-center">
+                  <a href={`${URLS.repo}/blob/master/TheJourney.md`} target="_blank" rel="noreferrer" className="inline-flex items-center">
                     <BookOpen className="mr-2 h-4 w-4" /> Read the build log
                   </a>
                 </Button>
